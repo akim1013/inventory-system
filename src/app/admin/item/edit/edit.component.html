@@ -1,0 +1,113 @@
+<app-menu></app-menu>
+<div class="content">
+  <div class="grid grid-cols-12 gap-6">
+      <div class="col-span-12">
+          <div class="intro-y box lg:mt-5">
+              <div class="flex items-center p-5 border-b border-gray-200">
+                  <h2 class="font-medium text-base mr-auto">
+                      Item information
+                  </h2>
+              </div>
+              <div class="p-5">
+                  <div class="grid grid-cols-12 gap-5">
+                      <div class="col-span-12 xl:col-span-4">
+                          <h4>Click or drop image</h4>
+                          <div class="border border-gray-200 rounded-md p-5 flex item-image justify-center">
+                              <ngx-dropzone (change)="onSelect($event)">
+                                  <ngx-dropzone-label>Item image. Drop it here!</ngx-dropzone-label>
+                              </ngx-dropzone>
+                              <div class="item-preview" *ngIf="item">
+                                <img src="{{item.image ? item.image : 'assets/images/place_holder.png'}}" alt="Purchasing system image">
+                              </div>
+                              <div class="remove-image" (click)="remove_item_image()">
+                                <i data-feather="x" class="w-4 h-4 mr-2" appFeatherIcon style="color: white; margin: 0px;"></i>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="col-span-12 xl:col-span-8">
+                        <form (ngSubmit)="onSubmit()" #itemForm="ngForm" class="validate-form">
+                          <div class="grid grid-cols-12 gap-5" *ngIf="item">
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Inventory ID</label>
+                                <input type="text" class="input w-full border" placeholder="Inventory ID" [(ngModel)]="item.inventory_id" name="inventory_id" #inventory_id="ngModel" required disabled>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Gross weight</label>
+                                <input type="text" class="input w-full border" placeholder="Gross weight" [(ngModel)]="item.gross_weight" name="gross_weight" #gross_weight="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Category</label>
+                                <select class="input w-full border" [(ngModel)]="item.category" name="category" #name="ngModel">
+                                  <option value="dry">Dry</option>
+                                  <option value="frozen">Frozen</option>
+                                </select>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Description</label>
+                                <input type="text" class="input w-full border" placeholder="Vendor description" [(ngModel)]="item.vendor_description" name="vendor_description" #vendor_description="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Description 1</label>
+                                <input type="text" class="input w-full border" placeholder="Description" [(ngModel)]="item.description" name="description" #description="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Packing info</label>
+                                <input type="text" class="input w-full border" placeholder="0.6kg/bag 10bags/ctn" [(ngModel)]="item.packing_info" name="packing_info" #packing_info="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Customer UOM</label>
+                                <input type="text" class="input w-full border" placeholder="ctn" [(ngModel)]="item.uom" name="uom" #uom="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Cost</label>
+                                <input type="text" class="input w-full border" placeholder="Price of item" [(ngModel)]="item.price" name="price" #price="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>CBM</label>
+                                <input type="text" class="input w-full border" placeholder="Item cbm" [(ngModel)]="item.cbm" name="cbm" #cbm="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Qty in stock</label>
+                                <input type="text" class="input w-full border" placeholder="qty" [(ngModel)]="item.qty" name="qty" #qty="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>Max order Qty</label>
+                                <input type="text" class="input w-full border" placeholder="Max order Qty" [(ngModel)]="item.moq" name="moq" #moq="ngModel" required>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <label>User access</label>
+                                <select class="input w-full border" [(ngModel)]="item.user_access" name="user_access" #name="ngModel">
+                                  <option value="cooperator">Cooperator</option>
+                                  <option value="franchisee">Franchisee</option>
+                                  <option value="all">All users</option>
+                                </select>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6">
+                                <div class="grid grid-cols-12 gap-5">
+                                    <div class="col-span-6 xl:col-span-6 flex">
+                                      <input class="input input--switch border mr-2" type="checkbox" [(ngModel)]="item.status" name="status">
+                                      <span>Item activated</span>
+                                    </div>
+                                    <div class="col-span-6 xl:col-span-6 flex">
+                                      <input class="input input--switch border mr-2" type="checkbox" [(ngModel)]="item.qty_display" name="qty_display">
+                                      <span>Display qty</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-12 xl:col-span-6"></div>
+                            <div class="col-span-12 xl:col-span-6 flex justify-start">
+                                <button type="button" class="button w-20 bg-theme-7 text-white mt-3 mr-3" routerLink="/item">Back</button>
+                                <button type="submit" class="button w-20 bg-theme-1 text-white mt-3" [disabled]="!itemForm.form.valid">Save</button>
+                                <div *ngIf="loading" class="mt-3 ml-3">
+                                  <app-loader></app-loader>
+                                </div>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

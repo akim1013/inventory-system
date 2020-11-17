@@ -1,0 +1,29 @@
+table tr th {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: sticky;
+  top: 0;
+  background: white;
+  box-shadow: 2px 2px 2px -1px rgba(0, 0, 0, 0.4);
+  margin-top: 0px;
+  z-index: 9;
+  border: none;
+}
+
+table tr td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.item-list {
+  max-height: 70vh;
+  overflow: auto;
+}
+
+tr.edit-item:hover {
+  background: rgba(0, 0, 0, 0.1);
+}

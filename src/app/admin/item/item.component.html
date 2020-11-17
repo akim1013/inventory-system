@@ -1,0 +1,139 @@
+<app-menu></app-menu>
+<div class="content">
+  <div class="intro-y flex flex-col sm:flex-row items-center mt-8">
+    <h2 class="text-lg font-medium mr-auto">
+      Items
+    </h2>
+    <div *ngIf="loading" class="mr-3">
+      <app-loader></app-loader>
+    </div>
+    <div class="w-full sm:w-auto flex mt-4 sm:mt-0">
+      <button class="dropdown-toggle button px-2 box text-gray-700 flex mr-3" (click)="export_excel()">
+        <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-feather="file" appFeatherIcon></i> </span><span>Export</span>
+      </button>
+      <div class="dropdown relative ml-auto sm:ml-0">
+        <button class="dropdown-toggle button px-2 box text-gray-700 flex">
+          <span class="w-5 h-5 flex items-center justify-center"> <i class="w-4 h-4" data-feather="plus" appFeatherIcon></i> </span><span>Add New Item</span>
+        </button>
+        <div class="dropdown-box mt-10 absolute w-40 top-0 right-0 z-20">
+          <div class="dropdown-box__content box p-2" style="position: relative;">
+            <a class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"> <i data-feather="file-plus" class="w-4 h-4 mr-2" appFeatherIcon></i> Upload excel </a>
+            <a routerLink="/item/add" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"> <i data-feather="edit" class="w-4 h-4 mr-2" appFeatherIcon></i> Add manually </a>
+            <input (change)="fileUpload($event)" type="file" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md"
+              style="position: absolute; top: 0.5rem; left: 0.5rem; width: 144px; height: 37px; opacity: 0; cursor: pointer;" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pos intro-y grid grid-cols-12">
+    <div class="intro-y col-span-12">
+      <div class="intro-y datatable-wrapper box mt-2 item-list">
+        <table class="table table-report table-report--bordered display w-full">
+          <thead>
+            <tr>
+              <th width="3%" class="text-center">Category</th>
+              <th width="5%" class="text-center">Inventory ID</th>
+              <th width="5%" class="">Image</th>
+              <th width="10%" class="text-center">Vendor description</th>
+              <th width="10%" class="text-center">Description</th>
+              <th width="10%" class="text-center">Packing info</th>
+              <th width="3%" class="text-center">Price</th>
+              <th width="5%" class="text-center">Sales price</th>
+              <th width="3%" class="text-center">QTY</th>
+              <th width="3%" class="text-center">CBF</th>
+              <th width="3%" class="text-center">Customer UOM</th>
+              <th width="3%" class="text-center">G.W.(lb)</th>
+              <th width="5%" class="text-center">Total G.W.(lb)</th>
+
+              <th width="5%" class="text-center">Max order qty</th>
+              <th width="10%" class="text-center">Added date</th>
+              <th width="10%" class="text-center">Status</th>
+              <th width="10%" class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="edit-item cursor-pointer" *ngFor="let item of globalService.items; index as idx;">
+              <td class="border-b">
+                <div class="font-medium text-center">{{item.category}}</div>
+              </td>
+              <td class="border-b text-center" (click)='editItem(item.inventory_id)'>
+                <div class="font-medium">{{item.inventory_id}}</div>
+              </td>
+              <td class="text-left border-b" (click)='editItem(item.inventory_id)'>
+                <div class="flex sm:justify-start">
+                  <div class="w-10 h-10 image-fit">
+                    <img src="{{item.image != '' ? item.image : 'assets/images/place_holder.png'}}" alt="Purchasing system image">
+                  </div>
+                </div>
+              </td>
+              <td class="border-b" (click)='editItem(item.inventory_id)'>
+                <div class="text-center font-medium">{{item.vendor_description}}</div>
+              </td>
+              <td class="border-b" (click)='editItem(item.inventory_id)'>
+                <div class="text-center font-medium">{{item.description}}</div>
+              </td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.packing_info}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.price != 'Market Price' ? ('$' + parse_float(item.price)) : item.price}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.sales_price != 'Market Price' ? ('$' + parse_float(item.sales_price)) : item.sales_price}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.qty_display=='true' ? item.qty : '-'}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.cbm}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.uom}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.gross_weight}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.gross_weight * item.qty | number}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.moq}}</td>
+              <td class="text-center border-b" (click)='editItem(item.inventory_id)'>{{item.created_at}}</td>
+              <td class="border-b">
+                <div class="flex m-auto justify-center">
+                  <input class="input input--switch border mr-2" type="checkbox" [checked]="item.status=='true'" (change)="status_change(item)">
+                  <div class="flex items-center sm:justify-center text-theme-{{item.status=='true' ? '9' : '6'}}"> {{item.status=='true' ? 'Activated' : 'Inactivated'}} </div>
+                </div>
+              </td>
+              <td class="text-center border-b">
+                <button (click)="deleteItem(item)" class="button button--sm m-auto flex items-center justify-center bg-theme-6 text-white"><i data-feather="trash" class="w-4 h-4 mr-2" appFeatherIcon></i>Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<table id="export-table" style="display: none;">
+  <thead>
+    <tr>
+      <td width="3%">Category</td>
+      <td width="3%">SQ</td>
+      <td width="10%">Item No.</td>
+      <td width="15%">品名</td>
+      <td width="20%">Name</td>
+      <td width="20%">Model</td>
+      <td width="3%">Price</td>
+      <td width="3%">Sales Price</td>
+      <td width="3%">Qty</td>
+      <td width="3%">Unit</td>
+      <td width="3%">G.W. (lb)</td>
+      <td width="3%">Total G.W.(lb)</td>
+      <td width="3%">max order q'ty</td>
+      <td width="3%">cbm</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of globalService.items">
+      <td>{{item['category']}}</td>
+      <td>XA</td>
+      <td>{{item['inventory_id']}}</td>
+      <td>{{item['vendor_description']}}</td>
+      <td>{{item['description']}}</td>
+      <td>{{item['packing_info']}}</td>
+      <td>{{item['price']}}</td>
+      <td>{{item['sales_price']}}</td>
+      <td>{{item['qty']}}</td>
+      <td>{{item['uom']}}</td>
+      <td>{{item['gross_weight']}}</td>
+      <td>{{item['gross_weight'] ? parse_float(item['gross_weight'] * item['qty']) : ''}}</td>
+      <td>{{item['moq']}}</td>
+      <td>{{item['cbm']}}</td>
+    </tr>
+  </tbody>
+</table>

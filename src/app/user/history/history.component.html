@@ -1,0 +1,175 @@
+<app-menu></app-menu>
+<div class="content">
+  <div class="intro-y flex items-center mt-8">
+    <h2 class="text-lg font-medium mr-auto flex">
+      My orders
+      <span *ngIf="loading" class="mr-3 absolute" style="left: 170px; top: -8px;">
+        <app-loader></app-loader>
+      </span>
+    </h2>
+  </div>
+  <div class="tab-content mt-3">
+    <div class="tab-content__pane active">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="intro-y box col-span-12 xl:col-span-8 overflow-y-auto overflow-x-hidden" style="height: fit-content; max-height: 90vh">
+          <div class="flex items-center px-5 py-5 sm:py-0 border-b border-gray-200 bg-white sticky top-0" style="z-index: 10;">
+            <h2 class="font-medium text-base mr-auto">
+              Orders ({{get_filtered_order_length()}})
+            </h2>
+            <div class="dropdown relative ml-auto sm:hidden">
+              <a class="dropdown-toggle w-5 h-5 block" href="javascript:;"> <i data-feather="more-horizontal" class="w-5 h-5 text-gray-700"></i> </a>
+              <div class="nav-tabs dropdown-box mt-5 absolute w-40 top-0 right-0 z-20">
+                <div class="dropdown-box__content box p-2">
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('all')">All</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('pending')">Pending</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('approved')">Approved</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('shipped')">Shipped</a>
+                </div>
+              </div>
+            </div>
+            <div class="nav-tabs ml-auto hidden sm:flex">
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6 active" (click)="change_filter('all')">All</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('pending')">Pending</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('approved')">Approved</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('shipped')">Shipped</a>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="tab-content">
+              <div class="tab-content__pane active">
+                <ng-template ngFor let-item [ngForOf]="orders" let-i="index">
+                  <ng-template [ngIf]="(filter == 'all') || item['status'] == filter">
+                    <div class="flex justify-center items-center pb-2 mb-2 border-b border-gray-200 cursor-pointer">
+                      <div class="border-l-2 border-theme-{{item['status'] == 'pending' ? '12' : (item['status'] == 'approved' ? '9' : (item['status'] == 'draft' ? '6' : '1'))}} pl-4" (click)="get_order_details(item['order_id'])">
+                        <div class="flex">
+                          <i data-feather="shopping-cart" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i>
+                          <a href="javascript:;" class="font-medium">{{item['order_id']}}</a>
+                        </div>
+                        <div class="flex text-gray-600">
+                          <span><i data-feather="clock" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i></span>
+                          <span>{{format_date_time(item['order_time'])}}</span>
+                        </div>
+                      </div>
+                      <div class="ml-auto flex items-center">
+                        <span class="sm:flex hidden py-1 px-2 mr-8 rounded-full text-xs bg-theme-{{item['status'] == 'pending' ? '12' : (item['status'] == 'approved' ? '9' : (item['status'] == 'draft' ? '6' : '1'))}} text-white cursor-pointer font-medium">{{item['status']}}</span>
+                        <button class="button button--sm px-2 mr-1 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="delete_order(item['order_id'])">
+                          <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                        </button>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="intro-y box col-span-12 xl:col-span-4 overflow-y-auto overflow-x-hidden" style="height: fit-content; max-height: 90vh">
+          <div class="flex items-center px-5 py-5 sm:py-3 border-b border-gray-200 bg-white sticky top-0" style="z-index: 10;">
+            <h2 class="font-medium text-base mr-auto">
+              Order details <span *ngIf="selected_order"> -- {{selected_order['order_id']}}</span>
+            </h2>
+          </div>
+          <div class="p-3 pt-0">
+            <div class="relative flex items-center mt-5" *ngIf="!selected_order">
+              Please select an order to see details
+            </div>
+            <div class="sticky bg-white pt-3 order-manage-controls" style="z-index: 10;">
+              <div *ngIf="selected_order" class="flex flex-col">
+                <div class="flex flex-col md:flex-row md:justify-between mt-2">
+                  <div class="flex flex-row justify-around md:ml-5 md:w-3/5 w-full">
+                    <div class="flex flex-col justify-between">
+                      <circle-progress
+                        [percent]="globalService.sum_total_cbm_dry(order_detail)['reminder_percent']"
+                        [subtitle]="[
+                          'Dry CBF',
+                          globalService.sum_total_cbm_dry(order_detail)['fill_cbf'] + ' lb to fill up.',
+                          'Total: ' + globalService.sum_total_cbm_dry(order_detail)['total_pallet'] + ' pallet' + (globalService.sum_total_cbm_dry(order_detail)['total_pallet'] == 1 ? '' : 's')
+                        ]"
+                        [outerStrokeColor]="'#FBC500'"
+                      ></circle-progress>
+                      <small>Total Dry CBF(lb): {{globalService.sum_total_cbm_dry(order_detail)['total_cbf'] | number:'.2-2'}}</small>
+                      <small>1 pallet CBF(lb): {{globalService.sum_total_cbm_dry(order_detail)['one_pallet_cbf'] | number:'.2-2'}}</small>
+                      <small>Total pallets: {{globalService.sum_total_cbm_dry(order_detail)['total_pallet']}}</small>
+                    </div>
+                    <div class="flex flex-col justify-between">
+                      <circle-progress
+                        [percent]="globalService.sum_total_cbm_frozen(order_detail)['reminder_percent']"
+                        [subtitle]="[
+                          'Frozen CBF',
+                          globalService.sum_total_cbm_frozen(order_detail)['fill_cbf'] + ' lb to fill up.',
+                          'Total: ' + globalService.sum_total_cbm_frozen(order_detail)['total_pallet'] + ' pallet' + (globalService.sum_total_cbm_frozen(order_detail)['total_pallet'] == 1 ? '' : 's')
+                        ]"
+                        [outerStrokeColor]="'#1C3FAA'"
+                      ></circle-progress>
+                      <small>Total Frozen CBF(lb): {{globalService.sum_total_cbm_frozen(order_detail)['total_cbf'] | number:'.2-2'}}</small>
+                      <small>1 pallet CBF(lb): {{globalService.sum_total_cbm_frozen(order_detail)['one_pallet_cbf'] | number:'.2-2'}}</small>
+                      <small>Total pallets: {{globalService.sum_total_cbm_frozen(order_detail)['total_pallet']}}</small>
+                    </div>
+                  </div>
+                  <div class="flex flex-col justify-end md:items-start md:mt-0 mt-2 ml-5 md:mr-5 md:w-2/5 w-full">
+                    <span class="mt-1">Total items: {{order_detail ? order_detail.length : '0'}}</span>
+                    <span>Status:
+                      <span class="py-1 px-2 rounded-full text-xs bg-theme-{{
+                          selected_order ? (selected_order['status'] == 'pending' ? '12' : (selected_order['status'] == 'approved' ? '9' : (selected_order['status'] == 'draft' ? '6' : '1'))) : ''}}
+                          text-white cursor-pointer font-medium">{{selected_order ? selected_order['status'] : ''}}
+                      </span>
+                    </span>
+                    <div class="text-theme-6 mt-1">Total charge: {{globalService.sum_total_price(order_detail) | currency}} {{globalService.price_tbded ? '+' : ''}}</div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-end mt-2">
+                  <button *ngIf="selected_order['status']=='draft'" class="button button--sm px-2 mr-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="add_more_items()">
+                    <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="plus" class="w-4 h-4" appFeatherIcon></i> </span>
+                  </button>
+                  <button class="button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="delete_order(selected_order['order_id'])">
+                    <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                  </button>
+                </div>
+              </div>
+              <div class="w-full border-t border-gray-200 border-dashed my-2"></div>
+              <div *ngIf="selected_order && selected_order['status']=='shipped'" class="mt-2">
+                <div class="">Shipment date: {{selected_order['shipment_date']}}</div>
+                <div class="">Ref number: {{selected_order['shipment_ref_number']}}</div>
+                <div class="w-full border-t border-gray-200 border-dashed my-2"></div>
+              </div>
+            </div>
+            <div class="relative px-2 py-3 mt-3" *ngFor="let item of order_detail; index as idx;" style="border: 1px solid #eee; border-radius: 5px;">
+              <ng-template ngFor let-_item [ngForOf]="globalService.items" let-i="index">
+                <ng-template [ngIf]="_item['id'] == item['item_id']">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
+                      <img alt="Purchasing system image" src="{{ _item['image'] ? _item['image'] : 'assets/images/place_holder.png' }}">
+                    </div>
+                    <div class="ml-4 mr-auto w-4/5 md:w-1/2">
+                      <div class="font-medium block truncate">{{_item['vendor_description']}}({{_item['description']}})</div>
+                      <div class="flex">
+                        <span class="text-gray-600 text-xs mr-3">{{item.qty}} {{item.qty == 1 ? _item.uom : _item.uom + 's'}}</span>
+                        <span class="text-theme-6 text-xs font-bold">{{_item.price != '' && _item.price != 'Market Price' ? '$' + globalService.parse_float(globalService.parse_float(_item.price) * item.qty) : 'TBD'}}</span>
+                      </div>
+                    </div>
+                    <div *ngIf="selected_order['status']=='draft'" class="hidden md:flex items-center">
+                      <a href="javascript:;" class="ml-2 button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="edit_item(item)">
+                        <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="edit" class="w-4 h-4" appFeatherIcon></i> </span>
+                      </a>
+                      <button class="tooltip ml-2 button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_item(item)">
+                        <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                      </button>
+                    </div>
+                  </div>
+                  <div *ngIf="selected_order['status']=='draft'" class="mt-3 md:hidden flex items-center justify-end">
+                    <a href="javascript:;" class="button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="edit_item(item)">
+                      <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="edit" class="w-4 h-4" appFeatherIcon></i> </span>
+                    </a>
+                    <button class="ml-2 button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_item(item)">
+                      <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                    </button>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

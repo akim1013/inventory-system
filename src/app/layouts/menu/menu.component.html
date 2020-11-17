@@ -1,0 +1,31 @@
+<!-- BEGIN: Mobile Menu -->
+<div class="mobile-menu md:hidden">
+    <div class="mobile-menu-bar">
+        <a href="" class="flex mr-auto">
+            <img alt="Purchasing system image" class="w-6" src="assets/images/logo.svg">
+        </a>
+        <a href="javascript:;" id="mobile-menu-toggler"> <i data-feather="bar-chart-2" class="w-8 h-8 text-white transform -rotate-90" appFeatherIcon></i> </a>
+    </div>
+    <ul class="border-t border-theme-24 py-5 hidden">
+        <li *ngFor="let item of menuItems">
+            <a routerLink="/{{item.link}}" class="menu">
+                <div class="menu__icon"> <i [attr.data-feather]="item.icon" appFeatherIcon *ngIf="item.icon"></i> </div>
+                <div class="menu__title"> {{item.label}} </div>
+            </a>
+        </li>
+    </ul>
+</div>
+<!-- END: Mobile Menu -->
+<app-header></app-header>
+<!-- BEGIN: Top Menu -->
+<nav class="top-nav">
+    <ul>
+        <li *ngFor="let item of menuItems">
+            <a routerLink="/{{item.link}}" class="top-menu {{globalService.menu == item.link ? 'top-menu--active' : ''}}">
+                <div class="top-menu__icon"> <i [attr.data-feather]="item.icon" appFeatherIcon *ngIf="item.icon"></i> </div>
+                <div class="top-menu__title"> {{item.label}} </div>
+            </a>
+        </li>
+    </ul>
+</nav>
+<!-- END: Top Menu -->

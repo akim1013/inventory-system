@@ -1,0 +1,247 @@
+<app-menu></app-menu>
+<div class="content">
+  <div class="intro-y flex items-center mt-8">
+    <h2 class="text-lg font-medium mr-auto flex">
+      Order Management
+      <span *ngIf="loading" class="mr-3 absolute" style="left: 170px; top: -8px;">
+        <app-loader></app-loader>
+      </span>
+    </h2>
+  </div>
+  <div class="tab-content mt-3">
+    <div class="tab-content__pane active">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="intro-y box col-span-12 xl:col-span-8 overflow-y-auto overflow-x-hidden" style="height: fit-content; max-height: 90vh">
+          <div class="flex items-center px-5 py-5 sm:py-0 border-b border-gray-200 bg-white sticky top-0" style="z-index: 10;">
+            <h2 class="font-medium text-base mr-auto">
+              Orders ({{get_filtered_order_length()}})
+            </h2>
+            <div class="dropdown relative ml-auto sm:hidden">
+              <a class="dropdown-toggle w-5 h-5 block" href="javascript:;"> <i data-feather="more-horizontal" class="w-5 h-5 text-gray-700"></i> </a>
+              <div class="nav-tabs dropdown-box mt-5 absolute w-40 top-0 right-0 z-20">
+                <div class="dropdown-box__content box p-2">
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('all')">All</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('pending')">Pending</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('approved')">Approved</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('shipped')">Shipped</a>
+                </div>
+              </div>
+            </div>
+            <div class="nav-tabs ml-auto hidden sm:flex">
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6 active" (click)="change_filter('all')">All</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('pending')">Pending</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('approved')">Approved</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('shipped')">Shipped</a>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="tab-content">
+              <div class="tab-content__pane active">
+                <ng-template ngFor let-item [ngForOf]="orders" let-i="index">
+                  <ng-template [ngIf]="(filter == 'all') || item['status'] == filter">
+                    <div class="flex justify-center items-center pb-2 mb-2 border-b border-gray-200 cursor-pointer">
+                      <div class="border-l-2 border-theme-{{item['status'] == 'pending' ? '12' : (item['status'] == 'approved' ? '9' : '1')}} pl-4" (click)="get_order_details(item['order_id'])">
+                        <div class="flex">
+                          <i data-feather="shopping-cart" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i>
+                          <a href="javascript:;" class="font-medium">{{item['order_id']}}</a>
+                        </div>
+                        <div class="flex text-gray-600">
+                          <span><i data-feather="clock" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i></span>
+                          <span>{{format_date_time(item['order_time'])}}</span>
+                        </div>
+                      </div>
+                      <div class="ml-auto flex items-center">
+                        <div class="md:flex mr-5 hidden" (click)="get_order_details(item['order_id'])">
+                          <i data-feather="user" class="w-4 h-4 text-blue-700 mr-2" appFeatherIcon></i>
+                          <span class="">{{get_user_name(item['customer_id'])}}( <span class="text-gray-600">{{get_user_email(item['customer_id'])}}</span> )</span>
+                        </div>
+                        <span class="sm:flex hidden py-1 px-2 mr-8 rounded-full text-xs bg-theme-{{item['status'] == 'pending' ? '12' : (item['status'] == 'approved' ? '9' : '1')}} text-white cursor-pointer font-medium">{{item['status']}}</span>
+                        <button class="button button--sm px-2 mr-1 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="delete_order(item['order_id'])">
+                          <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                        </button>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="intro-y box col-span-12 xl:col-span-4 overflow-y-auto overflow-x-hidden" style="height: fit-content; max-height: 90vh">
+          <div class="flex items-center px-5 py-5 sm:py-3 border-b border-gray-200 bg-white sticky top-0" style="z-index: 10;">
+            <h2 class="font-medium text-base mr-auto">
+              Order details <span *ngIf="selected_order"> -- {{selected_order['order_id']}} <em>by</em> {{get_user_name(selected_order['customer_id'])}}</span>
+            </h2>
+            <div class="dropdown relative ml-auto sm:hidden">
+              <a class="dropdown-toggle w-5 h-5 block" href="javascript:;"> <i data-feather="more-horizontal" class="w-5 h-5 text-gray-700"></i> </a>
+              <div class="dropdown-box mt-5 absolute w-40 top-0 right-0 z-20">
+                <div class="dropdown-box__content box p-2">
+                  <a href="javascript:;" class="flex items-center p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="export_excel(selected_order ? selected_order['order_id'] : 0)"> <i data-feather="file" class="w-4 h-4 mr-2"></i> Export </a>
+                </div>
+              </div>
+            </div>
+            <button class="button border relative flex items-center text-gray-700 hidden sm:flex" (click)="export_excel(selected_order ? selected_order['order_id'] : 0)"> <i data-feather="file" class="w-4 h-4 mr-2"></i> Export </button>
+          </div>
+          <div class="p-3 pt-0">
+            <div class="relative flex items-center mt-5" *ngIf="!selected_order">
+              Please select an order to see details
+            </div>
+            <div class="sticky bg-white pt-3 order-manage-controls" style="z-index: 10;">
+              <div *ngIf="selected_order" class="mb-3 w-full">
+                <div class="flex flex-row justify-around md:ml-5 w-full">
+                  <div class="flex flex-col justify-between">
+                    <circle-progress
+                      [percent]="globalService.sum_total_cbm_dry(order_detail)['reminder_percent']"
+                      [subtitle]="[
+                        'Dry CBF',
+                        globalService.sum_total_cbm_dry(order_detail)['fill_cbf'] + ' lb to fill up.',
+                        'Total: ' + globalService.sum_total_cbm_dry(order_detail)['total_pallet'] + ' pallet' + (globalService.sum_total_cbm_dry(order_detail)['total_pallet'] == 1 ? '' : 's')
+                      ]"
+                      [outerStrokeColor]="'#FBC500'"
+                    ></circle-progress>
+                    <small>Total Dry CBF(lb): {{globalService.sum_total_cbm_dry(order_detail)['total_cbf'] | number:'.2-2'}}</small>
+                    <small>1 pallet CBF(lb): {{globalService.sum_total_cbm_dry(order_detail)['one_pallet_cbf'] | number:'.2-2'}}</small>
+                    <small>Total pallets: {{globalService.sum_total_cbm_dry(order_detail)['total_pallet']}}</small>
+                  </div>
+                  <div class="flex flex-col justify-between">
+                    <circle-progress
+                      [percent]="globalService.sum_total_cbm_frozen(order_detail)['reminder_percent']"
+                      [subtitle]="[
+                        'Frozen CBF',
+                        globalService.sum_total_cbm_frozen(order_detail)['fill_cbf'] + ' lb to fill up.',
+                        'Total: ' + globalService.sum_total_cbm_frozen(order_detail)['total_pallet'] + ' pallet' + (globalService.sum_total_cbm_frozen(order_detail)['total_pallet'] == 1 ? '' : 's')
+                      ]"
+                      [outerStrokeColor]="'#1C3FAA'"
+                    ></circle-progress>
+                    <small>Total Frozen CBF(lb): {{globalService.sum_total_cbm_frozen(order_detail)['total_cbf'] | number:'.2-2'}}</small>
+                    <small>1 pallet CBF(lb): {{globalService.sum_total_cbm_frozen(order_detail)['one_pallet_cbf'] | number:'.2-2'}}</small>
+                    <small>Total pallets: {{globalService.sum_total_cbm_frozen(order_detail)['total_pallet']}}</small>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="selected_order" class="flex justify-between">
+                <div>
+                  <div class="flex mb-1">
+                    <div class="mr-1">Total items:</div>
+                    <div class="">{{order_detail ? order_detail.length : '0'}}</div>
+                  </div>
+                  <div class="flex font-bold">
+                    <div class="mr-1">Total charge:</div>
+                    <div class="text-theme-6">{{globalService.sum_total_price(order_detail) | currency}} {{globalService.price_tbded ? '+' : ''}}</div>
+                  </div>
+                </div>
+                <div class="inline-flex items-center">
+                  <div class="mr-4">
+                    <div class="flex items-center text-gray-700">
+                      <input type="radio" class="input border mr-2" id="vertical-radio-pending" name="vertical_radio_button" value="pending" [checked]="selected_order.status=='pending'" (click)="order_status_change('pending')">
+                      <label class="cursor-pointer select-none text-yellow-600" for="vertical-radio-pending">Pending</label>
+                    </div>
+                    <div class="flex items-center text-gray-700 mt-1">
+                      <input type="radio" class="input border mr-2" id="vertical-radio-approve" name="vertical_radio_button" value="approved" [checked]="selected_order.status=='approved'" (click)="order_status_change('approved')">
+                      <label class="cursor-pointer select-none text-green-600" for="vertical-radio-approve">Approved</label>
+                    </div>
+                    <div class="flex items-center text-gray-700 mt-1">
+                      <input type="radio" class="input border mr-2" id="vertical-radio-ship" name="vertical_radio_button" value="shipped" [checked]="selected_order.status=='shipped'" (click)="order_status_change('shipped')">
+                      <label class="cursor-pointer select-none text-blue-600" for="vertical-radio-ship">Shipped</label>
+                    </div>
+                  </div>
+                  <button *ngIf="selected_order['status']=='pending'" class="button button--sm px-2 mr-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="add_more_items()">
+                    <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="plus" class="w-4 h-4" appFeatherIcon></i> </span>
+                  </button>
+                  <button class="button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="delete_order(selected_order['order_id'])">
+                    <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                  </button>
+                </div>
+              </div>
+              <div class="w-full border-t border-gray-200 border-dashed my-2"></div>
+              <div *ngIf="selected_order && selected_order['status']=='shipped'" class="mt-2">
+                <div class="">Shipment date: {{selected_order['shipment_date']}}</div>
+                <div class="">Ref number: {{selected_order['shipment_ref_number']}}</div>
+                <div class="w-full border-t border-gray-200 border-dashed my-2"></div>
+              </div>
+            </div>
+
+            <div class="relative px-2 py-3 mt-3" *ngFor="let item of order_detail; index as idx;" style="border: 1px solid #eee; border-radius: 5px;">
+              <ng-template ngFor let-_item [ngForOf]="globalService.items" let-i="index">
+                <ng-template [ngIf]="_item['id'] == item['item_id']">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 flex-none image-fit rounded-full overflow-hidden">
+                      <img alt="Purchasing system image" src="{{ _item['image'] ? _item['image'] : 'assets/images/place_holder.png' }}">
+                    </div>
+                    <div class="ml-4 mr-auto w-4/5 md:w-1/2">
+                      <div class="font-medium block truncate">{{_item['vendor_description']}}({{_item['description']}})</div>
+                      <div class="flex">
+                        <span class="text-gray-600 text-xs mr-3">{{item.qty}} {{item.qty == 1 ? _item.uom : _item.uom + 's'}}</span>
+                        <span class="text-theme-6 text-xs font-bold">{{_item.price != '' && _item.price != 'Market Price' ? '$' + globalService.parse_float(globalService.parse_float(_item.price) * item.qty) : 'TBD'}}</span>
+                      </div>
+                    </div>
+                    <div class="hidden md:flex items-center">
+                      <a *ngIf="selected_order['status']=='pending'" href="javascript:;" class="ml-2 button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="edit_item(item)">
+                        <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="edit" class="w-4 h-4" appFeatherIcon></i> </span>
+                      </a>
+                      <button *ngIf="selected_order['status']=='pending'" class="ml-2 button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_item(item)">
+                        <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mt-3 md:hidden flex items-center justify-end">
+                    <a *ngIf="selected_order['status']=='pending'" href="javascript:;" class="button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="edit_item(item)">
+                      <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="edit" class="w-4 h-4" appFeatherIcon></i> </span>
+                    </a>
+                    <button *ngIf="selected_order['status']=='pending'" class="ml-2 button button--sm px-2 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_item(item)">
+                      <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+                    </button>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<table id="export-table" style="display: none;">
+  <thead>
+    <tr>
+      <td width="3%">BRANCH</td>
+      <td width="3%">SQ</td>
+      <td width="10%">Item No.</td>
+      <td width="15%">品名</td>
+      <td width="20%">Name</td>
+      <td width="20%">Model</td>
+      <td width="3%">Price</td>
+      <td width="3%">Qty</td>
+      <td width="3%">Unit</td>
+      <td width="3%">Subtotal</td>
+      <td width="3%">G.W. (lb)</td>
+      <td width="3%">Total G.W. (lb)</td>
+      <td width="3%">Sales price</td>
+      <td width="3%">max order q'ty</td>
+      <td width="3%">cbm</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of order_detail">
+      <ng-template ngFor let-gitem [ngForOf]="globalService.items" let-i="index">
+        <ng-template [ngIf]="gitem['id']==item['item_id']">
+          <td>{{get_user_name(selected_order['customer_id'])}}</td>
+          <td>{{gitem['gross_weight']}}</td>
+          <td>{{gitem['inventory_id']}}</td>
+          <td>{{gitem['vendor_description']}}</td>
+          <td>{{gitem['description']}}</td>
+          <td>{{gitem['packing_info']}}</td>
+          <td>{{gitem['price']}}</td>
+          <td>{{item['qty']}}</td>
+          <td>{{gitem['uom']}}</td>
+          <td>{{gitem['price'] != '' && gitem['price'] != 'Market Price' ? globalService.parse_float(gitem['price'] * item['qty']) : 'TBD'}}</td>
+          <td>{{gitem['gross_weight']}}</td>
+          <td>{{gitem['gross_weight'] ? globalService.parse_float(gitem['gross_weight'] * item['qty']) : ''}}</td>
+          <td>{{gitem['sales_price']}}</td>
+          <td>{{gitem['moq']}}</td>
+          <td>{{gitem['cbm']}}</td>
+        </ng-template>
+      </ng-template>
+    </tr>
+  </tbody>
+</table>

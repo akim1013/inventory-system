@@ -1,0 +1,14 @@
+.item-layout-style a{
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: 4px;
+}
+.item-layout-style a.active{
+  background: #1C3FAA;
+  color: white;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
