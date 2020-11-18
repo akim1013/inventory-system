@@ -26,6 +26,7 @@ import { ManageOrderComponent } from './admin/manage-order/manage-order.componen
 import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SettingComponent } from './user/setting/setting.component';
 import { CountComponent } from './user/count/count.component';
+import { OrderReceiveComponent } from './user/order-receive/order-receive.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { CountComponent } from './user/count/count.component';
     LoaderComponent,
     ManageOrderComponent,
     SettingComponent,
-    CountComponent
+    CountComponent,
+    OrderReceiveComponent
   ],
   imports: [
     BrowserModule,

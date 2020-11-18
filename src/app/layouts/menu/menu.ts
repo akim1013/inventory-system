@@ -6,15 +6,9 @@ export const MENU: Object[] = [
     role: 'user'
   },
   {
-    link: 'order',
-    label: 'Orders',
-    icon: 'database',
-    role: 'user'
-  },
-  {
-    link: 'history',
-    label: 'History',
-    icon: 'activity',
+    link: 'order-receive',
+    label: 'Orders and receive',
+    icon: 'file',
     role: 'user'
   },
   {

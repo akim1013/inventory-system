@@ -6,7 +6,7 @@ import { CookieService } from '../services/cookie.service';
 
 const api_url = 'http://198.11.172.117/sbm-dashboard';
 
-const controller = 'ps';
+const controller = 'is';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,28 @@ export class ApiService {
         return res;
       }));
   }
+
+  // Inventory APIs
+  getPsItem(data: FormData) {
+    return this.http.post(`${api_url}/${controller}/get_ps_item`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  getIsItem(data: FormData) {
+    return this.http.post(`${api_url}/${controller}/get_is_item`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  addIsItem(data: FormData){
+    return this.http.post(`${api_url}/${controller}/add_is_item`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  //
+
   getItem(data: FormData) {
     return this.http.post(`${api_url}/${controller}/get_item`, data)
       .pipe(map(res => {
