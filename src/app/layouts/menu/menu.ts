@@ -1,9 +1,9 @@
 export const MENU: Object[] = [
   {
-    link: 'item',
-    label: 'Items',
-    icon: 'box',
-    role: 'admin'
+    link: 'count',
+    label: 'Count',
+    icon: 'eye',
+    role: 'user'
   },
   {
     link: 'order',
@@ -18,9 +18,9 @@ export const MENU: Object[] = [
     role: 'user'
   },
   {
-    link: 'manage-order',
-    label: 'Orders',
-    icon: 'database',
-    role: 'admin'
+    link: 'setting',
+    label: 'Item setting',
+    icon: 'settings',
+    role: 'user'
   },
 ];

@@ -22,8 +22,8 @@
             Sign In
           </h2>
           <div class="intro-x mt-8">
-            <input type="text" class="intro-x login__input input input--lg border border-gray-300 block" placeholder="Branch ID" value="{{username}}" (change)="username_change($event)">
-            <input type="password" class="intro-x login__input input input--lg border border-gray-300 block mt-4" placeholder="Password" value="{{password}}" (change)="password_change($event)">
+            <input type="text" tabindex='1' class="intro-x login__input input input--lg border border-gray-300 block" placeholder="Branch ID" value="{{username}}" (change)="username_change($event)">
+            <input type="password" tabindex='2' class="intro-x login__input input input--lg border border-gray-300 block mt-4" placeholder="Password" value="{{password}}" (change)="password_change($event)">
           </div>
           <div class="intro-x flex text-gray-700 text-xs sm:text-sm mt-4">
             <div class="flex items-center mr-auto">
@@ -38,7 +38,7 @@
             {{success_message}}
           </div>
           <div class="intro-x mt-5 xl:mt-8 text-center xl:text-left flex">
-            <button class="button button--lg w-full xl:w-32 text-white bg-theme-1 xl:mr-3" (click)="login()">Login</button>
+            <button class="button button--lg w-full xl:w-32 text-white bg-theme-1 xl:mr-3" (click)="login()" tabindex='3'>Login</button>
             <div *ngIf="loading" class="flex ml-2" style="align-items: center;">
               <app-loader></app-loader>
             </div>

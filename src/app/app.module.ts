@@ -24,6 +24,8 @@ import { LoaderComponent } from './fragments/loader/loader.component';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { ManageOrderComponent } from './admin/manage-order/manage-order.component';
 import { NgCircleProgressModule } from 'ng-circle-progress';
+import { SettingComponent } from './user/setting/setting.component';
+import { CountComponent } from './user/count/count.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +42,9 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
     UnauthorizedComponent,
     PageNotFoundComponent,
     LoaderComponent,
-    ManageOrderComponent
+    ManageOrderComponent,
+    SettingComponent,
+    CountComponent
   ],
   imports: [
     BrowserModule,

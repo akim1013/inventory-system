@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { ParseService } from '../../services/parse.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { first } from 'rxjs/operators';
-import { Item } from '../../admin/item/item';
 import * as moment from 'moment';
 import * as XLSX from 'xlsx';
 
@@ -20,8 +18,6 @@ export class OrderComponent implements OnInit {
 
   constructor(
     public globalService: GlobalService,
-    private route: ActivatedRoute,
-    private router: Router,
     private api: ApiService,
     private parseService: ParseService,
     private toast: ToastrService,
