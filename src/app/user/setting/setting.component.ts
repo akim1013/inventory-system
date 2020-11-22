@@ -74,24 +74,20 @@ export class SettingComponent implements OnInit {
                 this.adjust_items()
               } else {
                 this.toast.error('IS Item fetching error. There is an issue with server. Please try again.', 'Error');
-                this.loading = false
                 this.loader.complete()
               }
             },
             error => {
-              this.loading = false
               this.loader.complete()
             }
           );
         } else {
           this.toast.error('PS Item fetching error. There is an issue with server. Please try again.', 'Error');
+          this.loader.complete()
         }
-        this.loading = false
-        this.loader.complete()
       },
       error => {
         console.log(error)
-        this.loading = false
         this.loader.complete()
       }
     );
@@ -118,7 +114,6 @@ export class SettingComponent implements OnInit {
       }
     })
     this.loader.complete()
-    this.loading = false
   }
   public add_or_update_to_is = (inventory_id: string, type: string) => {
     let item = this.ps_items.filter(item => item['inventory_id'] == inventory_id)[0]

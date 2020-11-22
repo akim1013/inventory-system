@@ -25,9 +25,9 @@ export class LoginComponent implements OnInit {
   constructor(private route: ActivatedRoute, private router: Router, private authService: AuthService, private cookieService: CookieService,) {
     if (authService.isLoggedIn()) {
       if(authService.currentUserRole == 'admin'){
-        router.navigate(['item']);
+        router.navigate(['setting']);
       }else{
-        router.navigate(['order']);
+        router.navigate(['count']);
       }
     }
   }

@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { GlobalService } from '../../services/global.service'
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import Swal from 'sweetalert2';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-count',
@@ -22,10 +23,13 @@ export class CountComponent implements OnInit {
     private parseService: ParseService,
     private toast: ToastrService,
     private authService: AuthService,
-    private loadingBar: LoadingBarService
+    private loadingBar: LoadingBarService,
+    private router: Router
   ) { }
   
   loader = this.loadingBar.useRef();
+
+  availablePeriod = ['week1', 'week2', 'week3', 'week4', 'week5', 'month']
 
   date = 'Week ' + Math.ceil(moment().date() / 7) + ', ' + moment().format('MMM YYYY')
   
@@ -47,18 +51,28 @@ export class CountComponent implements OnInit {
           counter_id: this.authService.currentUser()['id']
         })).pipe(first()).subscribe(data => {
           console.log(data)
-        }, error => {})
+          this.router.navigate(['count/draft']);
+          this.loader.complete()
+        }, error => {
+          console.log(error)
+          this.loader.complete()
+        })
       } 
     })
   }
   canStartCount(){
+    this.loader.start()
     this.api.canStartCount(this.parseService.encode({
       counter_id: this.authService.currentUser()['id']
     })).pipe(first()).subscribe(data => {
       if(data['data'] == 1){
         this.isCountable = true
+        this.loader.complete()
       }
-    }, error => {})
+    }, error => {
+      console.log(error)
+      this.loader.complete()
+    })
   }
   getIsCounts(){
 
