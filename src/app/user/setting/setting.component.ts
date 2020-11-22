@@ -4,9 +4,9 @@ import { ParseService } from '../../services/parse.service';
 import { AuthService } from '../../services/auth.service';
 import { ToastrService } from 'ngx-toastr';
 import { first } from 'rxjs/operators';
-import * as moment from 'moment';
 import { GlobalService } from '../../services/global.service'
 import Swal from 'sweetalert2';
+import { LoadingBarService } from '@ngx-loading-bar/core';
 
 @Component({
   selector: 'app-setting',
@@ -20,8 +20,10 @@ export class SettingComponent implements OnInit {
     private api: ApiService,
     private parseService: ParseService,
     private toast: ToastrService,
-    private authService: AuthService
+    private authService: AuthService,
+    private loadingBar: LoadingBarService
   ) { }
+  loader = this.loadingBar.useRef();
 
   loading = false
   user: Object
@@ -45,6 +47,7 @@ export class SettingComponent implements OnInit {
   }
 
   private getItems = () => {
+    this.loader.start()
     this.api.getPsItem(
       this.parseService.encode({
         company: this.authService.currentUser()['company']
@@ -71,22 +74,25 @@ export class SettingComponent implements OnInit {
                 this.adjust_items()
               } else {
                 this.toast.error('IS Item fetching error. There is an issue with server. Please try again.', 'Error');
+                this.loading = false
+                this.loader.complete()
               }
-              this.loading = false
             },
             error => {
-              console.log(error)
               this.loading = false
+              this.loader.complete()
             }
           );
         } else {
           this.toast.error('PS Item fetching error. There is an issue with server. Please try again.', 'Error');
         }
         this.loading = false
+        this.loader.complete()
       },
       error => {
         console.log(error)
         this.loading = false
+        this.loader.complete()
       }
     );
   }
@@ -111,10 +117,12 @@ export class SettingComponent implements OnInit {
         item['added'] = true
       }
     })
+    this.loader.complete()
+    this.loading = false
   }
   public add_or_update_to_is = (inventory_id: string, type: string) => {
     let item = this.ps_items.filter(item => item['inventory_id'] == inventory_id)[0]
-
+    let is_item = this.is_items.filter(item => item['inventory_id'] == inventory_id)[0]
     Swal.fire({
       title: type == 'add' ? 'Add item to count list' : 'Update item',
       html: `
@@ -126,26 +134,19 @@ export class SettingComponent implements OnInit {
           <div class="flex items-center mt-3">
             <div>Safety QTY: </div>
             <div class="ml-1 sm:ml-5 flex items-center">
-              <input placeholder="8" style="width: 40px" id="safety_qty" type="number" min="0" max="999" step="0.01" class="text-sm w-full outline-none border rounded py-2 px-1 text-right"/>
+              <input 
+                placeholder="8" 
+                style="width: 40px" 
+                id="safety_qty" 
+                type="number" 
+                min="0" 
+                max="999" 
+                step="0.01" 
+                class="text-sm w-full outline-none border rounded py-2 px-1 text-right"
+                value="${is_item ? is_item['safety_qty'] : 0}"
+                />
               <span title="The safety qty will be automatically adjusted by algorithm" class="ml-2 text-sm button button--sm bg-theme-1 text-white">Auto set</span>
             </div>
-          </div>
-          <div class="flex items-center mt-3">
-            <div title="Packing info for inventory count">Packing: </div>
-            <div class="ml-1 sm:ml-5">
-            <input id="sp_qty" placeholder="10" type="number" min="0" max="999" step="0.01" style="width: 40px" class="text-sm outline-none border rounded py-2 px-1 text-right"/>
-            <input id="secondary_unit" placeholder="bags" type="text" style="width: 60px" class="text-sm outline-none border border-theme-9 rounded py-2 px-1 text-right"/>
-            /
-            <input id="primary_unit" placeholder="carton" type="text" style="width: 60px" class="text-sm outline-none border border-theme-3 rounded py-2 px-1 text-right"/>
-            </div>
-          </div>
-          <div class="mt-3 flex items-center">
-            (ex: <p class="text-sm text-theme-6 mr-2">10</p>
-            <p class="text-sm text-theme-9 mr-2">bags</p> / <p class="text-sm text-theme-3">carton</p>)
-          </div>
-          <div class="mt-3 flex items-start">
-            <div class="text-sm text-gray-600">Purchasing packing info:</div>
-            <p class="text-sm text-gray-600">${item['packing_info']}</p>
           </div>
         </div>
       `,
@@ -154,20 +155,24 @@ export class SettingComponent implements OnInit {
       allowOutsideClick: false,
       preConfirm: () => {
         let safety_qty = document.querySelector('#safety_qty')['value']
-        let sp_qty = document.querySelector('#sp_qty')['value']
-        let primary_unit = document.querySelector('#primary_unit')['value']
-        let secondary_unit = document.querySelector('#secondary_unit')['value']
-        if(safety_qty == '' || sp_qty == '' || primary_unit == '' || secondary_unit == ''){
+        // let sp_qty = document.querySelector('#sp_qty')['value']
+        // let primary_unit = document.querySelector('#primary_unit')['value']
+        // let secondary_unit = document.querySelector('#secondary_unit')['value']
+        if(safety_qty == ''){
           this.toast.error('You need to input all required data.', 'Error')
           return false
         }
-        this.loading = true
+        // if(safety_qty == '' || sp_qty == '' || primary_unit == '' || secondary_unit == ''){
+        //   this.toast.error('You need to input all required data.', 'Error')
+        //   return false
+        // }
+        this.loader.start()
         this.api.addIsItem(this.parseService.encode({
           safety_qty: safety_qty,
-          sp_qty: sp_qty,
+          sp_qty: 0,
           inventory_id: inventory_id,
-          primary_unit: primary_unit,
-          secondary_unit: secondary_unit,
+          primary_unit: '',
+          secondary_unit: '',
           branch_id: this.user['branch_id']
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {
@@ -176,15 +181,29 @@ export class SettingComponent implements OnInit {
           } else {
             this.toast.error('There had been a database error. Please try again later.', 'Error');
           }
-          this.loading = false;
+          this.loader.complete()
         }, error => {
           this.toast.error('There had been a database error. Please try again later.', 'Error');
-          this.loading = false;
+          this.loader.complete()
         })
       }
     })
   }
-  public remove_item = (id) => {
-    console.log(id)
+  public remove_item = (id: any) => {
+    this.loader.start()
+    this.api.removeIsItem(this.parseService.encode({
+      id: id
+    })).pipe(first()).subscribe(data => {
+      if (data['data'] == true) {
+        this.toast.success('Item removed from count list successfully.', 'Success');
+        this.getItems()
+      } else {
+        this.toast.error('There had been a database error. Please try again later.', 'Error');
+      }
+      this.loader.complete()
+    }, error => {
+      this.toast.error('There had been a database error. Please try again later.', 'Error');
+      this.loader.complete()
+    })
   }
 }

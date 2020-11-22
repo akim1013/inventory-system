@@ -44,6 +44,48 @@ export class ApiService {
         return res;
       }))
   }
+  removeIsItem(data: FormData){
+    return this.http.post(`${api_url}/${controller}/remove_is_item`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  getIsCounts(data: FormData){
+    return this.http.post(`${api_url}/${controller}/get_is_counts`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  addIsCount(data: FormData){
+    return this.http.post(`${api_url}/${controller}/add_is_count`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  removeIsCount(data: FormData){
+    return this.http.post(`${api_url}/${controller}/remove_is_count`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  draftIsCount(data: FormData){
+    return this.http.post(`${api_url}/${controller}/draft_is_count`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  getCItems(data: FormData){
+    return this.http.post(`${api_url}/${controller}/get_c_item`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  canStartCount(data: FormData){
+    return this.http.post(`${api_url}/${controller}/can_start_count`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
   //
 
   getItem(data: FormData) {

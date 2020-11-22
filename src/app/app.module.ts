@@ -19,6 +19,8 @@ import { UnauthorizedComponent } from './auth/unauthorized/unauthorized.componen
 import { PageNotFoundComponent } from './auth/page-not-found/page-not-found.component';
 import { FormsModule } from '@angular/forms';
 import { ToastrModule } from 'ngx-toastr';
+import { LOADING_BAR_CONFIG } from '@ngx-loading-bar/core';
+import { LoadingBarModule } from '@ngx-loading-bar/core';
 import { LoaderComponent } from './fragments/loader/loader.component';
 
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
@@ -27,6 +29,7 @@ import { NgCircleProgressModule } from 'ng-circle-progress';
 import { SettingComponent } from './user/setting/setting.component';
 import { CountComponent } from './user/count/count.component';
 import { OrderReceiveComponent } from './user/order-receive/order-receive.component';
+import { DraftComponent } from './user/count/draft/draft.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +49,8 @@ import { OrderReceiveComponent } from './user/order-receive/order-receive.compon
     ManageOrderComponent,
     SettingComponent,
     CountComponent,
-    OrderReceiveComponent
+    OrderReceiveComponent,
+    DraftComponent
   ],
   imports: [
     BrowserModule,
@@ -54,6 +58,7 @@ import { OrderReceiveComponent } from './user/order-receive/order-receive.compon
     appRoutingModule,
     NgxDropzoneModule,
     HttpClientModule,
+    LoadingBarModule,
     FormsModule,
     ToastrModule.forRoot(),
     SweetAlert2Module.forRoot(),
@@ -69,7 +74,9 @@ import { OrderReceiveComponent } from './user/order-receive/order-receive.compon
       subtitleFontSize: '12px'
     })
   ],
-  providers: [],
+  providers: [
+    { provide: LOADING_BAR_CONFIG, useValue: { latencyThreshold: 100 } }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

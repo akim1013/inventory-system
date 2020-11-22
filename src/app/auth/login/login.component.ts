@@ -66,7 +66,7 @@ export class LoginComponent implements OnInit {
             if(data['res']['role'] == 'admin'){
               this.returnUrl = '/item';
             }else{
-              this.returnUrl = '/order';
+              this.returnUrl = '/count';
             }
             setTimeout(() => {
               this.router.navigate([this.returnUrl]);

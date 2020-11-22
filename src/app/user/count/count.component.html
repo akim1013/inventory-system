@@ -1,4 +1,21 @@
 <app-menu></app-menu>
 <div class="content">
-
+  <div class="grid grid-cols-12 gap-6 mt-8">
+    <div class="intro-y box col-span-12 sm:col-span-12">
+      <div class="flex items-center px-5 py-5 sm:py-3 border-b border-gray-200">
+        <h2 class="font-medium text-base mr-auto">{{date}}</h2>
+        <button *ngIf="isCountable" class="button w-48 rounded-full bg-theme-14 text-theme-10 flex items-center justify-center" (click)="startCount()">
+          <i data-feather="plus" class="mr-2" appFeatherIcon></i>
+          Start counting
+        </button>
+        <button *ngIf="!isCountable" class="button w-48 rounded-full bg-theme-14 text-theme-10 flex items-center justify-center" (click)="continueCount()">
+          <i data-feather="play" class="mr-2" appFeatherIcon></i>
+          Continue counting
+        </button>
+      </div>
+      <div class="p-5">
+        
+      </div>
+    </div>
+  </div>
 </div>
