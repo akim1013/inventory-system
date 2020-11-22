@@ -18,7 +18,7 @@ import { AuthGuard } from './guards/auth.guard';
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'count', component: CountComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
-  { path: 'count/draft', component: DraftComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
+  { path: 'count/draft/:id', component: DraftComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   { path: 'order-receive', component: OrderReceiveComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   { path: 'setting', component: SettingComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   //{ path: 'order', component: OrderComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },

@@ -80,8 +80,38 @@ export class ApiService {
         return res;
       }))
   }
+  getDraftItems(data: FormData){
+    return this.http.post(`${api_url}/${controller}/get_draft_items`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  addCountDetail(data: FormData){
+    return this.http.post(`${api_url}/${controller}/add_count_detail`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
   canStartCount(data: FormData){
     return this.http.post(`${api_url}/${controller}/can_start_count`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  completeCount(data: FormData){
+    return this.http.post(`${api_url}/${controller}/complete_count`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  isDraft(data: FormData){
+    return this.http.post(`${api_url}/${controller}/is_draft`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  removeDraftDetailItem(data: FormData){
+    return this.http.post(`${api_url}/${controller}/remove_draft_detail_item`, data)
       .pipe(map(res => {
         return res;
       }))

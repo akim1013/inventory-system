@@ -15,7 +15,35 @@
         </button>
       </div>
       <div class="p-5">
-
+        <ng-template ngFor let-item [ngForOf]="allCounts" let-i="index">
+          <div class="flex justify-center items-center pb-2 mb-2 border-b border-gray-200 cursor-pointer">
+            <div class="border-l-2 border-theme-{{item['status'] == 'draft' ? '12' : '1'}} pl-4">
+              <div class="flex">
+                <i data-feather="user" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i>
+                <a href="javascript:;" class="font-medium">{{item['counter_name']}}</a>
+              </div>
+              <div class="flex text-gray-600 items-center">
+                <span><i data-feather="clock" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i></span>
+                <span>{{format_date_time(item['timestamp'])}}</span>
+                <span class="bg-theme-14 text-theme-10 rounded px-2 ml-5">{{item.period}}</span>
+              </div>
+            </div>
+            <div class="ml-auto flex items-center">
+              <span class="sm:flex hidden py-1 px-2 mr-8 rounded-full text-xs bg-theme-{{item['status'] == 'draft' ? '12' : '1'}} text-white cursor-pointer font-medium">{{item['status']}}</span>
+              <button class="button button--sm px-2 mr-1 border text-theme-{{item['status'] == 'draft' ? '12' : '1'}} focus:outline-none" (click)="view_count(item['is_count_id'], item['status'])">
+                <span *ngIf="item['status']=='draft'" class="w-5 h-5 flex items-center justify-center"> 
+                  <i data-feather="edit" class="w-4 h-4" appFeatherIcon></i> 
+                </span>
+                <span *ngIf="item['status']=='completed'" class="w-5 h-5 flex items-center justify-center"> 
+                  <i data-feather="eye" class="w-4 h-4" appFeatherIcon></i> 
+                </span>
+              </button>
+              <button class="button button--sm px-2 mr-1 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_count(item['is_count_id'], item['period'])">
+                <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
+              </button>
+            </div>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>
