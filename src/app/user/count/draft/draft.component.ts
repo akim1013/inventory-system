@@ -35,6 +35,7 @@ export class DraftComponent implements OnInit {
 
   draft_id = -1
   draft_items: Array<Object> = []
+  period = ''
 
   is_draft = false;
 
@@ -51,10 +52,15 @@ export class DraftComponent implements OnInit {
         id: id 
       })
     ).pipe(first()).subscribe(data => {
-      if(data['data'][0].status == 'completed'){
-        this.is_draft = false
+      if(data['status'] === 'success'){
+        if(data['data'][0].status == 'completed'){
+          this.is_draft = false
+        }else{
+          this.is_draft = true
+        }
+        this.period = data['data'][0].period
       }else{
-        this.is_draft = true
+        this.toast.error('There had been an error. Please try again later.', 'Error');
       }
       this.loader.complete()
     }, error => {
@@ -113,25 +119,32 @@ export class DraftComponent implements OnInit {
   search_is_item(e){
     this.is_search_key = e.target.value
   }
-  add_to_count(item){
+  add_to_count(item: { [x: string]: string; is_item_id: any; }){
     Swal.fire({
       title: 'Add this item to count list?',
       html: `
         <div class="p-5">
-          <div class="flex items-center">
-            <p class="text-left truncate">${item['description']}</p>
-            <p class="ml-auto text-red-400 truncate">${item['vendor_description']}</p>
+          <div class="flex items-center mt-2">
+            <div class="w-full flex justify-start items-center">Description: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> ${item['description']}</span></div>
           </div>
           <div class="flex items-center mt-2">
-            <p class="text-left truncate">${item['packing_info']}</p>
-            ${item['category'] == 'frozen' ?
-             '<span class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">frozen</span>' :
-             '<span class="px-2 ml-2 rounded-full border border-theme-12 text-theme-12">dry</span>'
-            }
+            <div class="w-full flex justify-start items-center">Vendor description: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> ${item['vendor_description']}</span></div>
           </div>
-          <div class="flex items-center mt-3">
-            <div>Qty: </div>
-            <div class="ml-1 sm:ml-5 flex items-center">
+          <div class="flex items-center mt-2">
+            <div class="w-full flex justify-start items-center">Packing info: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> ${item['packing_info']}</span></div>
+          </div>
+          <div class="flex items-center mt-2">
+            <div class="w-full flex justify-start items-center">Price: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> $${item['price']}</span></div>
+          </div>
+          <div class="flex items-center mt-2">
+            <div class="w-full flex justify-start items-center">Category: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> ${item['category'] == 'frozen' ?
+            '<span class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">frozen</span>' :
+            '<span class="px-2 ml-2 rounded-full border border-theme-12 text-theme-12">dry</span>'
+           }</span></div>
+          </div>
+          <div class="flex items-center mt-3 w-full">
+            <div class="flex items-center w-full">
+              <div class="mr-2">Pack Qty: </div>
               <input 
                 placeholder="0" 
                 style="width: 40px" 
@@ -143,6 +156,21 @@ export class DraftComponent implements OnInit {
                 class="text-sm w-full outline-none border rounded py-2 px-1 text-right"
               />
             </div>
+            ${ this.period === 'month' ? `
+            <div class="ml-1 sm:ml-5 flex items-center w-full">
+              <div class="mr-2">Detail Qty: </div>
+              <input 
+                placeholder="0" 
+                style="width: 40px" 
+                id="secondary_qty" 
+                type="number" 
+                min="0" 
+                max="999" 
+                step="0.01" 
+                class="text-sm w-full outline-none border rounded py-2 px-1 text-right"
+              />
+            </div>
+            ` : '' }
           </div>
         </div>
       `,
@@ -151,6 +179,10 @@ export class DraftComponent implements OnInit {
       allowOutsideClick: false,
       preConfirm: () => {
         let primary_qty = document.querySelector('#primary_qty')['value']
+        let secondary_qty = document.querySelector('#secondary_qty') ? document.querySelector('#secondary_qty')['value'] : 0
+        if(secondary_qty == ''){
+          secondary_qty = 0
+        }
         if(primary_qty == '' || primary_qty == 0){
           this.toast.error('You need to input primary qty.', 'Error')
           return false
@@ -160,7 +192,7 @@ export class DraftComponent implements OnInit {
           is_count_id: this.draft_id,
           is_item_id: item.is_item_id,
           qty_primary: primary_qty,
-          qty_secondary: 0
+          qty_secondary: secondary_qty
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {
             this.toast.success('Item counted successfully.', 'Success');

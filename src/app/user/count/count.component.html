@@ -25,7 +25,7 @@
               <div class="flex text-gray-600 items-center">
                 <span><i data-feather="clock" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i></span>
                 <span>{{format_date_time(item['timestamp'])}}</span>
-                <span class="bg-theme-14 text-theme-10 rounded px-2 ml-5">{{item.period}}</span>
+                <span class="bg-theme-{{item.period === 'month' ? '31' : '14'}} text-theme-{{item.period === 'month' ? '6' : '10'}} rounded px-2 ml-5">{{item.period}}</span>
               </div>
             </div>
             <div class="ml-auto flex items-center">

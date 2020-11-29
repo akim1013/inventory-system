@@ -38,8 +38,8 @@
               </div>
             </div>
             <div class="font-medium text-gray-700 w-1/5 sm:w-auto">
-              <button title="Add this item to inventory system" *ngIf="!item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_to_count(item)">+ ADD</button>
-              <button title="This item was already added to inventory system" *ngIf="item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border text-gray-600 cursor-not-allowed">ADDED</button>
+              <button title="Add this item to count list" *ngIf="!item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_to_count(item)">+ ADD</button>
+              <button title="This item was already added to count list" *ngIf="item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border text-gray-600 cursor-not-allowed">ADDED</button>
             </div>
           </div>
         </ng-template>
@@ -69,7 +69,8 @@
                 {{item.vendor_description}}
               </div>
               <div class="text-gray-600 mr-5 sm:mr-5">
-                Qty: {{item.qty_primary}}
+                <span>Pack qty: {{item.qty_primary}}</span> 
+                <span class="ml-2" *ngIf="item.qty_secondary != 0">Detail qty: {{item.qty_secondary}}</span>
               </div>
             </div>
             <div *ngIf="is_draft" class="font-medium text-gray-700 w-1/5 sm:w-auto">

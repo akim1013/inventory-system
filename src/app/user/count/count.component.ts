@@ -37,6 +37,8 @@ export class CountComponent implements OnInit {
 
   draftCountId = 0
   draftPeriod = ''
+  lastPeriod = ''
+  lastTimestamp = ''
 
   allCounts: Array<Object> = []
 
@@ -46,26 +48,81 @@ export class CountComponent implements OnInit {
     this.getIsCounts()
   }
   startCount(){
-    Swal.fire({
-      title: `Do you want to start week ${Math.ceil(moment().date() / 7)} count?`,
-      showCancelButton: true,
-      confirmButtonText: `Start`,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.loader.start()
-        this.api.addIsCount(this.parseService.encode({
-          counter_id: this.authService.currentUser()['id'],
-          period: `week${Math.ceil(moment().date() / 7)}` // Need to modify for monthly count 
-        })).pipe(first()).subscribe(data => {
-          console.log(data)
-          this.router.navigate(['count/draft', data['data']]);
-          this.loader.complete()
-        }, error => {
-          console.log(error)
-          this.loader.complete()
-        })
-      } 
-    })
+    if(Math.ceil(moment().date() / 7) > 3){
+      Swal.fire({
+        title: `Start count?`,
+        showDenyButton: true,
+        icon: 'question',
+        allowOutsideClick: false,
+        text: `It\'s almost end of the month and you can start monthly count. Or you can start week${Math.ceil(moment().date() / 7)} count. What are you going to do?`,
+        confirmButtonText: `Weekly count`,
+        denyButtonText: `Montly count`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.startWeeklyCount()
+        } else {
+          this.startMonthlyCount()
+        }
+      })
+    }else{
+      this.startWeeklyCount()
+    }
+  }
+
+  startWeeklyCount(){
+    if(
+        ((this.lastPeriod === `week${Math.ceil(moment().date() / 7)}`) && (moment(this.lastTimestamp).diff(moment(), 'days') < 7)) || 
+        ((this.lastPeriod === 'month') && (moment(this.lastTimestamp).diff(moment(), 'days') < 28))
+      ){
+      Swal.fire({
+        title: `You can\'t start count.`,
+        icon: 'error',
+        text: `Reason: ${ this.lastPeriod === 'month' ? 'You have finished monthly count for this month.' : `You have already finished week${Math.ceil(moment().date() / 7)} count.` }`
+      })
+    }else{
+      Swal.fire({
+        title: `Do you want to start week ${Math.ceil(moment().date() / 7)} count?`,
+        showCancelButton: true,
+        confirmButtonText: `Start`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.loader.start()
+          this.api.addIsCount(this.parseService.encode({
+            counter_id: this.authService.currentUser()['id'],
+            branch_id: this.authService.currentUser()['branch_id'],
+            period: `week${Math.ceil(moment().date() / 7)}`
+          })).pipe(first()).subscribe(data => {
+            this.router.navigate(['count/draft', data['data']]);
+            this.loader.complete()
+          }, error => {
+            console.log(error)
+            this.loader.complete()
+          })
+        } 
+      })
+    }
+  }
+  startMonthlyCount(){
+    if((this.lastPeriod === 'month') && (moment(this.lastTimestamp).diff(moment(), 'days') < 28)){
+      Swal.fire({
+        title: `You can\'t start count.`,
+        icon: 'error',
+        text: `Reason: You already finished monthly count for this month.`
+      })
+    }else{
+      this.loader.start()
+      this.api.addIsCount(this.parseService.encode({
+        counter_id: this.authService.currentUser()['id'],
+        branch_id: this.authService.currentUser()['branch_id'],
+        period: `month`
+      })).pipe(first()).subscribe(data => {
+        this.router.navigate(['count/draft', data['data']]);
+        this.loader.complete()
+      }, error => {
+        console.log(error)
+        this.loader.complete()
+      })
+    }
   }
   continueCount(){
     Swal.fire({
@@ -80,22 +137,35 @@ export class CountComponent implements OnInit {
     })
   }
   canStartCount(){
+    this.isCountable = false
+    this.lastPeriod = ''
+    this.lastTimestamp = ''
     this.loader.start()
     this.api.canStartCount(this.parseService.encode({
       counter_id: this.authService.currentUser()['id']
     })).pipe(first()).subscribe(data => {
       let res = data['data']
-      if(res.exist_draft){
-        this.draftCountId = res.draft_id
-        this.draftPeriod = res.draft_period
-      }else{
+      
+      if(res.length === 0){
         this.isCountable = true
+      }else{
+        if(res[0].status !== 'draft'){
+          this.isCountable = true
+          this.lastPeriod = res[0].period
+          this.lastTimestamp = res[0].timestamp
+        }else{
+          this.draftCountId = res[0].count_id
+          this.draftPeriod = res[0].period
+        }
       }
       this.loader.complete()
     }, error => {
       console.log(error)
       this.loader.complete()
     })
+  }
+  possibleCount(){
+    console.log(this.draftPeriod)
   }
   getIsCounts(){
     this.loader.start()
@@ -126,6 +196,7 @@ export class CountComponent implements OnInit {
           is_count_id: id
         })).pipe(first()).subscribe(data => {
           this.toast.error(`${period} count has been removed successfully`, 'Error');
+          this.canStartCount()
           this.getIsCounts()
           this.loader.complete()
         }, error => {
@@ -142,4 +213,6 @@ export class CountComponent implements OnInit {
       this.router.navigate(['count/draft', id]);
     }
   }
+
+
 }
