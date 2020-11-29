@@ -161,7 +161,7 @@ export class ApiService {
       }))
   }
   addOrder(data: FormData){
-    return this.http.post(`${api_url}/${controller}/add_order`, data)
+    return this.http.post(`${api_url}/ps/add_order`, data)
       .pipe(map(res => {
         return res;
       }))

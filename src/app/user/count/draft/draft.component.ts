@@ -222,6 +222,7 @@ export class DraftComponent implements OnInit {
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {
             this.toast.success('Count finished successfully. Orders will be placed automatically.', 'Success');
+            this.place_order()
             this.back()
           } else {
             this.toast.error('There had been a database error. Please try again later.', 'Error');
@@ -233,6 +234,33 @@ export class DraftComponent implements OnInit {
         })
       } 
     })
+  }
+  place_order(){
+    let order_items = []
+    this.draft_items.forEach(item => {
+      if((parseFloat(item['safety_qty']) - parseFloat(item['qty_primary'])) > 0){
+        order_items.push({
+          item_id: item['item_id'],
+          qty: parseFloat(item['safety_qty']) - parseFloat(item['qty_primary']),
+        })
+      }
+    })
+    if(order_items.length > 0){
+      this.api.addOrder(this.parseService.encode({
+        customer_id: this.authService.currentUser()['id'],
+        order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+        order_id: this.authService.currentUser()['name'] + moment().format('hhmmssMMDDYYYY'),
+        status: 'pending',
+        items: JSON.stringify(order_items)
+      })).pipe(first()).subscribe(data => {
+        if (data['data'] == true) {
+          this.toast.success('Your order has been placed successfully.', 'Success');
+          //this.send_mail_to_user(items);
+        }
+      }, error => {
+        this.toast.error('There is an issue with server. Please try again later.', 'Error');
+      });
+    }
   }
   remove_from_count(item){
     Swal.fire({
