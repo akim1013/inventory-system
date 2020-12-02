@@ -38,7 +38,7 @@
                   <i data-feather="eye" class="w-4 h-4" appFeatherIcon></i> 
                 </span>
               </button>
-              <button class="button button--sm px-2 mr-1 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_count(item['is_count_id'], item['period'])">
+              <button *ngIf="item['status'] == 'draft'" class="button button--sm px-2 mr-1 border text-red-700 hover:bg-gray-300 focus:outline-none" (click)="remove_count(item['is_count_id'], item['period'])">
                 <span class="w-5 h-5 flex items-center justify-center"> <i data-feather="trash" class="w-4 h-4" appFeatherIcon></i> </span>
               </button>
             </div>

@@ -26,13 +26,13 @@ export class CountComponent implements OnInit {
     private loadingBar: LoadingBarService,
     private router: Router
   ) { }
-  
+
   loader = this.loadingBar.useRef();
 
   availablePeriod = ['week1', 'week2', 'week3', 'week4', 'week5', 'month']
 
   date = 'Week ' + Math.ceil(moment().date() / 7) + ', ' + moment().format('MMM YYYY')
-  
+
   isCountable = false
 
   draftCountId = 0
@@ -71,7 +71,7 @@ export class CountComponent implements OnInit {
 
   startWeeklyCount(){
     if(
-        ((this.lastPeriod === `week${Math.ceil(moment().date() / 7)}`) && (moment(this.lastTimestamp).diff(moment(), 'days') < 7)) || 
+        ((this.lastPeriod === `week${Math.ceil(moment().date() / 7)}`) && (moment(this.lastTimestamp).diff(moment(), 'days') < 7)) ||
         ((this.lastPeriod === 'month') && (moment(this.lastTimestamp).diff(moment(), 'days') < 28))
       ){
       Swal.fire({
@@ -98,7 +98,7 @@ export class CountComponent implements OnInit {
             console.log(error)
             this.loader.complete()
           })
-        } 
+        }
       })
     }
   }
@@ -133,7 +133,7 @@ export class CountComponent implements OnInit {
     }).then((result) => {
       if (result.isConfirmed) {
         this.router.navigate(['count/draft', this.draftCountId]);
-      } 
+      }
     })
   }
   canStartCount(){
@@ -145,7 +145,7 @@ export class CountComponent implements OnInit {
       counter_id: this.authService.currentUser()['id']
     })).pipe(first()).subscribe(data => {
       let res = data['data']
-      
+
       if(res.length === 0){
         this.isCountable = true
       }else{
@@ -204,7 +204,7 @@ export class CountComponent implements OnInit {
           console.log(error)
           this.loader.complete()
         })
-      } 
+      }
     })
   }
   view_count(id, status){
