@@ -186,6 +186,7 @@ export class CountComponent implements OnInit {
   remove_count(id, period){
     Swal.fire({
       title: `Are you sure to remove ${period} count?`,
+      text: 'The related order will be removed at the same time. Are you sure?',
       showCancelButton: true,
       confirmButtonText: `Remove`,
       icon: 'error'
@@ -195,7 +196,7 @@ export class CountComponent implements OnInit {
         this.api.removeIsCount(this.parseService.encode({
           is_count_id: id
         })).pipe(first()).subscribe(data => {
-          this.toast.error(`${period} count has been removed successfully`, 'Error');
+          this.toast.success(`${period} count has been removed successfully`, 'Error');
           this.canStartCount()
           this.getIsCounts()
           this.loader.complete()

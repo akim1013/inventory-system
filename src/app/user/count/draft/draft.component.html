@@ -69,8 +69,16 @@
                 {{item.vendor_description}}
               </div>
               <div class="text-gray-600 mr-5 sm:mr-5">
-                <span>Pack qty: {{item.qty_primary}}</span> 
-                <span class="ml-2" *ngIf="item.qty_secondary != 0">Detail qty: {{item.qty_secondary}}</span>
+                <span>
+                  <span class="font-bold">Packing info:</span> {{item.packing_info}} 
+                  <span class="font-bold ml-2">{{globalService.get_primary_uom(item.packing_info)}} qty:</span> {{item.qty_primary}}
+                </span> 
+                <span class="ml-2" *ngIf="item.qty_secondary != 0">
+                  <span class="font-bold">{{globalService.get_secondary_uom(item.packing_info)}} qty:</span> {{item.qty_secondary}}
+                </span>
+                <span class="ml-2">
+                  <span class="font-bold">Total price(value): {{item.value | currency}}</span>
+                </span>
               </div>
             </div>
             <div *ngIf="is_draft" class="font-medium text-gray-700 w-1/5 sm:w-auto">

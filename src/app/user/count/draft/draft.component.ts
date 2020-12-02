@@ -144,7 +144,7 @@ export class DraftComponent implements OnInit {
           </div>
           <div class="flex items-center mt-3 w-full">
             <div class="flex items-center w-full">
-              <div class="mr-2">Pack Qty: </div>
+              <div class="mr-2">${this.globalService.get_primary_uom(item.packing_info)} qty: </div>
               <input 
                 placeholder="0" 
                 style="width: 40px" 
@@ -158,7 +158,7 @@ export class DraftComponent implements OnInit {
             </div>
             ${ this.period === 'month' ? `
             <div class="ml-1 sm:ml-5 flex items-center w-full">
-              <div class="mr-2">Detail Qty: </div>
+              <div class="mr-2">${this.globalService.get_secondary_uom(item.packing_info)} qty: </div>
               <input 
                 placeholder="0" 
                 style="width: 40px" 
@@ -183,7 +183,7 @@ export class DraftComponent implements OnInit {
         if(secondary_qty == ''){
           secondary_qty = 0
         }
-        if(primary_qty == '' || primary_qty == 0){
+        if(primary_qty == ''){
           this.toast.error('You need to input primary qty.', 'Error')
           return false
         }
@@ -192,7 +192,8 @@ export class DraftComponent implements OnInit {
           is_count_id: this.draft_id,
           is_item_id: item.is_item_id,
           qty_primary: primary_qty,
-          qty_secondary: secondary_qty
+          qty_secondary: secondary_qty,
+          value: parseFloat(item.price) * (parseFloat(primary_qty) + parseFloat(secondary_qty) / parseFloat(this.globalService.get_sp_qty(item.packing_info))) 
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {
             this.toast.success('Item counted successfully.', 'Success');
@@ -216,13 +217,18 @@ export class DraftComponent implements OnInit {
       icon: 'question'
     }).then((result) => {
       if (result.isConfirmed) {
-        this.loader.complete()
+        this.loader.start()
         this.api.completeCount(this.parseService.encode({
           draft_id: this.draft_id
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {
             this.toast.success('Count finished successfully. Orders will be placed automatically.', 'Success');
-            this.place_order()
+            if(this.period == 'month'){
+              // Dashboard data send
+              this.send_data_to_dashboard()
+            }else{
+              this.place_order()
+            }
             this.back()
           } else {
             this.toast.error('There had been a database error. Please try again later.', 'Error');
@@ -246,21 +252,72 @@ export class DraftComponent implements OnInit {
       }
     })
     if(order_items.length > 0){
-      this.api.addOrder(this.parseService.encode({
-        customer_id: this.authService.currentUser()['id'],
-        order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-        order_id: this.authService.currentUser()['name'] + moment().format('hhmmssMMDDYYYY'),
-        status: 'pending',
-        items: JSON.stringify(order_items)
-      })).pipe(first()).subscribe(data => {
-        if (data['data'] == true) {
-          this.toast.success('Your order has been placed successfully.', 'Success');
-          //this.send_mail_to_user(items);
-        }
-      }, error => {
-        this.toast.error('There is an issue with server. Please try again later.', 'Error');
-      });
+      Swal.fire({
+        title: `Do you want to send order to purchasing system?`,
+        text: `${order_items.length} item(s) are below safety qty. The lack amout of qty will be ordered on purchasing system.`,
+        showCancelButton: true,
+        confirmButtonText: `Send order`,
+        icon: 'question'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.api.addOrder(this.parseService.encode({
+            customer_id: this.authService.currentUser()['id'],
+            order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+            order_id: this.authService.currentUser()['name'] + moment().format('hhmmssMMDDYYYY'),
+            status: 'pending',
+            ref_is_id: this.draft_id,
+            type: 'auto_order',
+            items: JSON.stringify(order_items)
+          })).pipe(first()).subscribe(data => {
+            if (data['data'] == true) {
+              this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
+              //this.send_mail_to_user(items);
+            }
+          }, error => {
+            this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
+          });
+
+          this.api.orderStatusUpdate(this.parseService.encode({
+            id: this.draft_id, // Iscount id 
+            order_status: 'order_pending'
+          })).pipe(first()).subscribe(data => {
+            
+          }, error => {
+            // this.toast.error('There had been a database error. Please try again later.', 'Error');
+            // this.loader.complete()
+          })
+        } 
+      })
     }
+  }
+  send_data_to_dashboard(){
+    let data = [...this.draft_items]
+    Swal.fire({
+      title: `Do you want to send monthly count data to dashboard?`,
+      text: `${data.length} item(s) are counted. These data will send to the dashboard to overview the monthly inventory stock.`,
+      showCancelButton: true,
+      confirmButtonText: `Send data`,
+      icon: 'question'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        //console.log(data)
+        this.api.sendDataToDashboard(this.parseService.encode({
+          company: this.authService.currentUser()['company'],
+          branch_id: this.authService.currentUser()['branch_id'],
+          counter_id: this.authService.currentUser()['id'],
+          is_count_id: this.draft_id,
+          items: JSON.stringify(data)
+        })).pipe(first()).subscribe(res => {
+          console.log(res)
+          if (res['data'] == true) {
+            this.toast.success('Order has been send to dashboard successfully.', 'Success');
+            //this.send_mail_to_user(items);
+          }
+        }, error => {
+          this.toast.error('There is an issue with server while sending data to dashboard. Please try again later.', 'Error');
+        });
+      } 
+    })
   }
   remove_from_count(item){
     Swal.fire({

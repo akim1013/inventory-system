@@ -104,6 +104,12 @@ export class ApiService {
         return res;
       }))
   }
+  orderStatusUpdate(data: FormData){
+    return this.http.post(`${api_url}/${controller}/order_status_update`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
   isDraft(data: FormData){
     return this.http.post(`${api_url}/${controller}/is_draft`, data)
       .pipe(map(res => {
@@ -112,6 +118,12 @@ export class ApiService {
   }
   removeDraftDetailItem(data: FormData){
     return this.http.post(`${api_url}/${controller}/remove_draft_detail_item`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  sendDataToDashboard(data: FormData){
+    return this.http.post(`${api_url}/${controller}/send_data_to_dashboard`, data)
       .pipe(map(res => {
         return res;
       }))
