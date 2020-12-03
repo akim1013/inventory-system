@@ -90,7 +90,8 @@ export class CountComponent implements OnInit {
           this.api.addIsCount(this.parseService.encode({
             counter_id: this.authService.currentUser()['id'],
             branch_id: this.authService.currentUser()['branch_id'],
-            period: `week${Math.ceil(moment().date() / 7)}`
+            period: `week${Math.ceil(moment().date() / 7)}`,
+            timestamp: moment().format('YYYY-MM-DD hh:mm:ss')
           })).pipe(first()).subscribe(data => {
             this.router.navigate(['count/draft', data['data']]);
             this.loader.complete()
@@ -114,7 +115,8 @@ export class CountComponent implements OnInit {
       this.api.addIsCount(this.parseService.encode({
         counter_id: this.authService.currentUser()['id'],
         branch_id: this.authService.currentUser()['branch_id'],
-        period: `month`
+        period: `month`,
+        timestamp: moment().format('YYYY-MM-DD hh:mm:ss')
       })).pipe(first()).subscribe(data => {
         this.router.navigate(['count/draft', data['data']]);
         this.loader.complete()

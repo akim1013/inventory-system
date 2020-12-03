@@ -49,7 +49,7 @@ export class DraftComponent implements OnInit {
     this.loader.start()
     this.api.isDraft(
       this.parseService.encode({
-        id: id 
+        id: id
       })
     ).pipe(first()).subscribe(data => {
       if(data['status'] === 'success'){
@@ -145,28 +145,28 @@ export class DraftComponent implements OnInit {
           <div class="flex items-center mt-3 w-full">
             <div class="flex items-center w-full">
               <div class="mr-2">${this.globalService.get_primary_uom(item.packing_info)} qty: </div>
-              <input 
-                placeholder="0" 
-                style="width: 40px" 
-                id="primary_qty" 
-                type="number" 
-                min="0" 
-                max="999" 
-                step="0.01" 
+              <input
+                placeholder="0"
+                style="width: 40px"
+                id="primary_qty"
+                type="number"
+                min="0"
+                max="999"
+                step="0.01"
                 class="text-sm w-full outline-none border rounded py-2 px-1 text-right"
               />
             </div>
             ${ this.period === 'month' ? `
             <div class="ml-1 sm:ml-5 flex items-center w-full">
               <div class="mr-2">${this.globalService.get_secondary_uom(item.packing_info)} qty: </div>
-              <input 
-                placeholder="0" 
-                style="width: 40px" 
-                id="secondary_qty" 
-                type="number" 
-                min="0" 
-                max="999" 
-                step="0.01" 
+              <input
+                placeholder="0"
+                style="width: 40px"
+                id="secondary_qty"
+                type="number"
+                min="0"
+                max="999"
+                step="0.01"
                 class="text-sm w-full outline-none border rounded py-2 px-1 text-right"
               />
             </div>
@@ -193,7 +193,7 @@ export class DraftComponent implements OnInit {
           is_item_id: item.is_item_id,
           qty_primary: primary_qty,
           qty_secondary: secondary_qty,
-          value: parseFloat(item.price) * (parseFloat(primary_qty) + parseFloat(secondary_qty) / parseFloat(this.globalService.get_sp_qty(item.packing_info))) 
+          value: parseFloat(item.price) * (parseFloat(primary_qty) + parseFloat(secondary_qty) / parseFloat(this.globalService.get_sp_qty(item.packing_info)))
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {
             this.toast.success('Item counted successfully.', 'Success');
@@ -238,7 +238,7 @@ export class DraftComponent implements OnInit {
           this.toast.error('There had been a database error. Please try again later.', 'Error');
           this.loader.complete()
         })
-      } 
+      }
     })
   }
   place_order(){
@@ -278,15 +278,15 @@ export class DraftComponent implements OnInit {
           });
 
           this.api.orderStatusUpdate(this.parseService.encode({
-            id: this.draft_id, // Iscount id 
+            id: this.draft_id, // Iscount id
             order_status: 'order_pending'
           })).pipe(first()).subscribe(data => {
-            
+
           }, error => {
             // this.toast.error('There had been a database error. Please try again later.', 'Error');
             // this.loader.complete()
           })
-        } 
+        }
       })
     }
   }
@@ -306,7 +306,8 @@ export class DraftComponent implements OnInit {
           branch_id: this.authService.currentUser()['branch_id'],
           counter_id: this.authService.currentUser()['id'],
           is_count_id: this.draft_id,
-          items: JSON.stringify(data)
+          items: JSON.stringify(data),
+          timestamp: moment().format('YYYY-MM-DD hh:mm:ss')
         })).pipe(first()).subscribe(res => {
           console.log(res)
           if (res['data'] == true) {
@@ -316,7 +317,7 @@ export class DraftComponent implements OnInit {
         }, error => {
           this.toast.error('There is an issue with server while sending data to dashboard. Please try again later.', 'Error');
         });
-      } 
+      }
     })
   }
   remove_from_count(item){
@@ -342,7 +343,7 @@ export class DraftComponent implements OnInit {
           this.toast.error('There had been a database error. Please try again later.', 'Error');
           this.loader.complete()
         })
-      } 
+      }
     })
   }
   back(){
