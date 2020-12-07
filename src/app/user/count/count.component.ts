@@ -71,8 +71,8 @@ export class CountComponent implements OnInit {
 
   startWeeklyCount(){
     if(
-        ((this.lastPeriod === `week${Math.ceil(moment().date() / 7)}`) && (moment(this.lastTimestamp).diff(moment(), 'days') < 7)) ||
-        ((this.lastPeriod === 'month') && (moment(this.lastTimestamp).diff(moment(), 'days') < 28))
+        ((this.lastPeriod === `week${Math.ceil(moment().date() / 7)}`) && (moment().diff(moment(this.lastTimestamp), 'days') < 7)) ||
+        ((this.lastPeriod === 'month') && (moment().diff(moment(this.lastTimestamp), 'days') < 28))
       ){
       Swal.fire({
         title: `You can\'t start count.`,
@@ -147,11 +147,19 @@ export class CountComponent implements OnInit {
       counter_id: this.authService.currentUser()['id']
     })).pipe(first()).subscribe(data => {
       let res = data['data']
-
+      console.log(res)
       if(res.length === 0){
         this.isCountable = true
       }else{
         if(res[0].status !== 'draft'){
+          this.isCountable = true
+          this.lastPeriod = res[0].period
+          this.lastTimestamp = res[0].timestamp
+        }else if((res[0].period == 'month') && (moment().diff(moment(res[0].timestamp), 'days') > 30)){
+          this.isCountable = true
+          this.lastPeriod = res[0].period
+          this.lastTimestamp = res[0].timestamp
+        }else if((res[0].period == 'week') && (moment().diff(moment(res[0].timestamp), 'days') > 7)){
           this.isCountable = true
           this.lastPeriod = res[0].period
           this.lastTimestamp = res[0].timestamp
