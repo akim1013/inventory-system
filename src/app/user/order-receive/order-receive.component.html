@@ -1,4 +1,78 @@
 <app-menu></app-menu>
 <div class="content">
-
+  <div class="intro-y flex items-center mt-8">
+    <h2 class="text-lg font-medium mr-auto flex">
+      My orders
+      <span *ngIf="loading" class="mr-3 absolute" style="left: 170px; top: -8px;">
+        <app-loader></app-loader>
+      </span>
+    </h2>
+  </div>
+  <div class="tab-content mt-3">
+    <div class="tab-content__pane active">
+      <div class="grid grid-cols-12 gap-6">
+        <div class="intro-y box col-span-12 xl:col-span-12 overflow-y-auto overflow-x-hidden" style="height: fit-content; max-height: 90vh">
+          <div class="flex items-center px-5 py-5 sm:py-0 border-b border-gray-200 bg-white sticky top-0" style="z-index: 10;">
+            <h2 class="font-medium text-base mr-auto">
+              Orders ({{get_filtered_order_length()}})
+            </h2>
+            <div class="dropdown relative ml-auto sm:hidden">
+              <a class="dropdown-toggle w-5 h-5 block" href="javascript:;"> <i data-feather="more-horizontal" class="w-5 h-5 text-gray-700"></i> </a>
+              <div class="nav-tabs dropdown-box mt-5 absolute w-40 top-0 right-0 z-20">
+                <div class="dropdown-box__content box p-2">
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('all')">All</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('pending')">Pending</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('processing')">Processing</a>
+                  <a href="javascript:;" class="block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md" (click)="change_filter('completed')">Completed</a>
+                </div>
+              </div>
+            </div>
+            <div class="nav-tabs ml-auto hidden sm:flex">
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6 active" (click)="change_filter('all')">All</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('pending')">Pending</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('processing')">Processing</a>
+              <a data-toggle="tab" href="javascript:;" class="py-5 ml-6" (click)="change_filter('completed')">Completed</a>
+            </div>
+          </div>
+          <div class="p-3">
+            <div class="tab-content">
+              <div class="tab-content__pane active">
+                <ng-template ngFor let-item [ngForOf]="orders" let-i="index">
+                  <ng-template [ngIf]="(filter == 'all') || item['status'] == filter">
+                    <div class="flex justify-center items-center pb-2 mb-2 border-b border-gray-200 cursor-pointer" (click)="get_order_details(item['id'])">
+                      <div class="w-64 border-l-2 
+                        {{
+                          item['status'] == 'pending' ? 'border-theme-12' : 
+                            (item['status'] == 'processing' ? 'border-theme-9' : 'border-theme-1')
+                          }}
+                         pl-4">
+                        <div class="flex">
+                          <i data-feather="shopping-cart" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i>
+                          <a href="javascript:;" class="font-medium">{{item['order_ref']}}</a>
+                        </div>
+                        <div class="flex text-gray-600">
+                          <span><i data-feather="clock" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i></span>
+                          <span>{{format_date_time(item['order_time'])}}</span>
+                        </div>
+                      </div>
+                      <div class="w-64">
+                        <span class="border border-theme-1 rounded p-1 px-2 text-theme-1">{{item.period}}</span>
+                      </div>
+                      <div class="ml-auto flex items-center">
+                        <div class="md:flex mr-5 hidden">
+                          <i data-feather="user" class="w-4 h-4 text-blue-700 mr-2" appFeatherIcon></i>
+                          <span class="">{{item.name}}( <span class="text-gray-600">{{item.email}} | {{item.branch}}</span> )</span>
+                        </div>
+                        <span class="sm:flex hidden py-1 px-2 mr-8 rounded-full text-xs bg-theme-{{item['status'] == 'pending' ? '12' : (item['status'] == 'processing' ? '9' : '1')}} text-white cursor-pointer font-medium">{{item['status']}}</span>
+                      </div>
+                    </div>
+                  </ng-template>
+                </ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

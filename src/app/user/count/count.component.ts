@@ -147,7 +147,6 @@ export class CountComponent implements OnInit {
       counter_id: this.authService.currentUser()['id']
     })).pipe(first()).subscribe(data => {
       let res = data['data']
-      console.log(res)
       if(res.length === 0){
         this.isCountable = true
       }else{

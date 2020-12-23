@@ -10,13 +10,13 @@
           <i class="w-4 h-4 absolute my-auto inset-y-0 mr-3 right-0" data-feather="search" appFeatherIcon></i>
         </div>
       </div>
-      <div class="p-5">
+      <div class="p-5" style="max-height: 600px; overflow: auto;">
         <div *ngFor="let item of ps_items; idx as index" class="relative flex items-center mb-2">
           <div class="w-12 h-12 flex-none image-fit">
             <img
               alt="Inventory system image"
               class="rounded-full"
-              src="{{item.image}}"
+              src="{{item.image ? item.image : 'assets/images/place_holder.png'}}"
             />
           </div>
           <div class="ml-4 mr-auto w-3/5">
@@ -33,7 +33,7 @@
             </div>
           </div>
           <div class="font-medium text-gray-700 w-1/5 sm:w-auto">
-            <button title="Add this item to inventory system" *ngIf="!item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_or_update_to_is(item.inventory_id, 'add')">+ ADD</button>
+            <button title="Add this item to inventory system" *ngIf="!item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_or_update_to_is(item.id, 'add')">+ ADD</button>
             <button title="This item was already added to inventory system" *ngIf="item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border text-gray-600 cursor-not-allowed">ADDED</button>
           </div>
         </div>
@@ -53,7 +53,7 @@
             <img
               alt="Inventory system image"
               class="rounded-full"
-              src="{{item.image}}"
+              src="{{item.image ? item.image : 'assets/images/place_holder.png'}}"
             />
           </div>
           <div class="ml-4 mr-auto w-3/5">
@@ -70,7 +70,7 @@
             </div>
           </div>
           <div class="font-medium text-gray-700 w-1/5 sm:w-auto">
-            <button title="Edit this item" class="mr-2 px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_or_update_to_is(item.inventory_id, 'update')">Update</button>
+            <button title="Edit this item" class="mr-2 px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_or_update_to_is(item.purchasing_item_id, 'update')">Update</button>
             <button title="Remove this item from count list" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-6 text-theme-6" (click)="remove_item(item.id)">REMOVE</button>
           </div>
         </div>

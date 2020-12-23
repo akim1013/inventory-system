@@ -9,6 +9,9 @@ import { GlobalService } from '../../../services/global.service'
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import Swal from 'sweetalert2';
+
+import { customAlphabet } from 'nanoid'
+const nanoid = customAlphabet('1234567890abcdef0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 17)
 @Component({
   selector: 'app-draft',
   templateUrl: './draft.component.html',
@@ -72,7 +75,8 @@ export class DraftComponent implements OnInit {
     this.loader.start()
     this.api.getCItems(
       this.parseService.encode({
-        branch_id: this.authService.currentUser()['branch_id']
+        company: this.authService.currentUser()['company'],
+        shop: this.authService.currentUser()['shop_name']
       })
     ).pipe(first()).subscribe(
       data => {
@@ -137,14 +141,17 @@ export class DraftComponent implements OnInit {
             <div class="w-full flex justify-start items-center">Price: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> $${item['price']}</span></div>
           </div>
           <div class="flex items-center mt-2">
-            <div class="w-full flex justify-start items-center">Category: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> ${item['category'] == 'frozen' ?
-            '<span class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">frozen</span>' :
-            '<span class="px-2 ml-2 rounded-full border border-theme-12 text-theme-12">dry</span>'
-           }</span></div>
+            <div class="w-full flex justify-start items-center">Category: 
+              <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> 
+                <span class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">${item['category']}</span>
+              </span>
+            </div>
           </div>
           <div class="flex items-center mt-3 w-full">
             <div class="flex items-center w-full">
-              <div class="mr-2">${this.globalService.get_primary_uom(item.packing_info)} qty: </div>
+              <div class="mr-2">${this.globalService.get_primary_uom(item.packing_info) ? 
+                this.globalService.get_primary_uom(item.packing_info) : 'Primary '
+              } qty: </div>
               <input
                 placeholder="0"
                 style="width: 40px"
@@ -158,7 +165,9 @@ export class DraftComponent implements OnInit {
             </div>
             ${ this.period === 'month' ? `
             <div class="ml-1 sm:ml-5 flex items-center w-full">
-              <div class="mr-2">${this.globalService.get_secondary_uom(item.packing_info)} qty: </div>
+              <div class="mr-2">${this.globalService.get_secondary_uom(item.packing_info) ? 
+                this.globalService.get_secondary_uom(item.packing_info) : 'Secondary '
+              } qty: </div>
               <input
                 placeholder="0"
                 style="width: 40px"
@@ -261,9 +270,12 @@ export class DraftComponent implements OnInit {
       }).then((result) => {
         if (result.isConfirmed) {
           this.api.addOrder(this.parseService.encode({
+            company: this.authService.currentUser()['company'],
+            shop: this.authService.currentUser()['shop_name'],
+            branch: this.authService.currentUser()['branch_id'],
             customer_id: this.authService.currentUser()['id'],
             order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-            order_id: this.authService.currentUser()['name'] + moment().format('hhmmssMMDDYYYY'),
+            order_ref: nanoid(),
             status: 'pending',
             ref_is_id: this.draft_id,
             type: 'auto_order',
@@ -303,6 +315,7 @@ export class DraftComponent implements OnInit {
         //console.log(data)
         this.api.sendDataToDashboard(this.parseService.encode({
           company: this.authService.currentUser()['company'],
+          shop: this.authService.currentUser()['shop_name'],
           branch_id: this.authService.currentUser()['branch_id'],
           counter_id: this.authService.currentUser()['id'],
           is_count_id: this.draft_id,
@@ -311,7 +324,7 @@ export class DraftComponent implements OnInit {
         })).pipe(first()).subscribe(res => {
           console.log(res)
           if (res['data'] == true) {
-            this.toast.success('Order has been send to dashboard successfully.', 'Success');
+            this.toast.success('Count detail data has been send to dashboard successfully.', 'Success');
             //this.send_mail_to_user(items);
           }
         }, error => {

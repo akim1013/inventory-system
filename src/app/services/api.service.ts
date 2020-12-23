@@ -173,7 +173,7 @@ export class ApiService {
       }))
   }
   addOrder(data: FormData){
-    return this.http.post(`${api_url}/ps/add_order`, data)
+    return this.http.post(`${api_url}/purchasing/create_auto_order`, data)
       .pipe(map(res => {
         return res;
       }))
@@ -252,6 +252,24 @@ export class ApiService {
   }
   sendStatusUpdateMail(data: FormData){
     return this.http.post(`${api_url}/${controller}/send_status_update_mail`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  purchasingSystemGetOrderHistory(data: FormData) {
+    return this.http.post(`${api_url}/purchasing/get_order_history_inventory`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  purchasingSystemGetOrderDetails(data: FormData) {
+    return this.http.post(`${api_url}/purchasing/get_order_details`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
+  purchasingSystemAcceptItem(data: FormData) {
+    return this.http.post(`${api_url}/purchasing/accept_item_inventory`, data)
       .pipe(map(res => {
         return res;
       }))

@@ -30,6 +30,7 @@ import { SettingComponent } from './user/setting/setting.component';
 import { CountComponent } from './user/count/count.component';
 import { OrderReceiveComponent } from './user/order-receive/order-receive.component';
 import { DraftComponent } from './user/count/draft/draft.component';
+import { DetailsComponent } from './user/order-receive/details/details.component';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { DraftComponent } from './user/count/draft/draft.component';
     SettingComponent,
     CountComponent,
     OrderReceiveComponent,
-    DraftComponent
+    DraftComponent,
+    DetailsComponent
   ],
   imports: [
     BrowserModule,

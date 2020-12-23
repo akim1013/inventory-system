@@ -50,7 +50,8 @@ export class SettingComponent implements OnInit {
     this.loader.start()
     this.api.getPsItem(
       this.parseService.encode({
-        company: this.authService.currentUser()['company']
+        company: this.authService.currentUser()['company'],
+        shop: this.authService.currentUser()['shop_name']
       })
     ).pipe(first()).subscribe(
       data => {
@@ -64,7 +65,8 @@ export class SettingComponent implements OnInit {
           })
           this.api.getIsItem(
             this.parseService.encode({
-              branch_id: this.authService.currentUser()['branch_id']
+              company: this.authService.currentUser()['company'],
+              shop: this.authService.currentUser()['shop_name'],
             })
           ).pipe(first()).subscribe(
             data => {
@@ -96,9 +98,9 @@ export class SettingComponent implements OnInit {
     // Identify added items 
     let is_item_ids = []
     this.is_items.map(item => {
-      is_item_ids.push(item['inventory_id'])
+      is_item_ids.push(item['purchasing_item_id'])
       this.ps_items.forEach(p_item => {
-        if(p_item['inventory_id'] == item['inventory_id']){
+        if(p_item['id'] == item['purchasing_item_id']){
           item['image'] = p_item['image']
           item['category'] = p_item['category']
           item['description'] = p_item['description']
@@ -107,7 +109,7 @@ export class SettingComponent implements OnInit {
       })
     })
     this.ps_items.map(item => {
-      if(is_item_ids.indexOf(item['inventory_id']) == -1){
+      if(is_item_ids.indexOf(item['id']) == -1){
         item['added'] = false
       }else{
         item['added'] = true
@@ -115,9 +117,9 @@ export class SettingComponent implements OnInit {
     })
     this.loader.complete()
   }
-  public add_or_update_to_is = (inventory_id: string, type: string) => {
-    let item = this.ps_items.filter(item => item['inventory_id'] == inventory_id)[0]
-    let is_item = this.is_items.filter(item => item['inventory_id'] == inventory_id)[0]
+  public add_or_update_to_is = (purchasing_item_id: string, type: string) => {
+    let item = this.ps_items.filter(item => item['id'] == purchasing_item_id)[0]
+    let is_item = this.is_items.filter(item => item['purchasing_item_id'] == purchasing_item_id)[0]
     Swal.fire({
       title: type == 'add' ? 'Add item to count list' : 'Update item',
       html: `
@@ -165,9 +167,11 @@ export class SettingComponent implements OnInit {
         this.api.addIsItem(this.parseService.encode({
           safety_qty: safety_qty,
           sp_qty: 0,
-          inventory_id: inventory_id,
+          purchasing_item_id: purchasing_item_id,
           primary_unit: '',
           secondary_unit: '',
+          company: this.user['company'],
+          shop: this.user['shop_name'],
           branch_id: this.user['branch_id']
         })).pipe(first()).subscribe(data => {
           if (data['data'] == true) {

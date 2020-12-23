@@ -14,12 +14,14 @@ import { CountComponent } from './user/count/count.component';
 import { DraftComponent } from './user/count/draft/draft.component';
 import { OrderReceiveComponent } from './user/order-receive/order-receive.component';
 import { AuthGuard } from './guards/auth.guard';
+import { DetailsComponent } from './user/order-receive/details/details.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'count', component: CountComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   { path: 'count/draft/:id', component: DraftComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   { path: 'order-receive', component: OrderReceiveComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
+  { path: 'order-receive/details/:id', component: DetailsComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   { path: 'setting', component: SettingComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   //{ path: 'order', component: OrderComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
   //{ path: 'history', component: HistoryComponent, canActivate: [AuthGuard], data: { roles: ['cooperator', 'franchisee'] } },
