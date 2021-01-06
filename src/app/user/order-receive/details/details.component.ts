@@ -97,6 +97,7 @@ export class DetailsComponent implements OnInit {
         partial_shipments.push({
           shipment_id: item.shipment_id,
           shipment_date: item.shipment_date,
+          shipment_eta: item.shipment_eta,
           shipment_ref_number: item.shipment_ref_number
         })
       }

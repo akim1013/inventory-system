@@ -114,7 +114,7 @@ export class GlobalService {
 
   get_primary_uom = (packing_info: string) => {
     if(packing_info.includes('/')){
-      let s = packing_info.split(' ')[1].split('/')[1]
+      let s = packing_info.split('/')[1]
       return s.charAt(0).toUpperCase() + s.slice(1)
     }else{
       return ''
@@ -122,7 +122,7 @@ export class GlobalService {
   }
   get_secondary_uom = (packing_info: string) => {
     if(packing_info.includes('/')){
-      let s = packing_info.split(' ')[1].split('/')[0].replace(/[0-9]/g, '')
+      let s = packing_info.split('/')[0].replace(/[0-9]/g, '')
       return s.charAt(0).toUpperCase() + s.slice(1)
     }else{
       return ''
@@ -130,7 +130,7 @@ export class GlobalService {
   }
   get_sp_qty = (packing_info: string) => {
     if(packing_info.includes('/')){
-      return packing_info.split('/')[1].match(/\d+/)[0]
+      return packing_info.split('/')[0].match(/\d+/)[0]
     }else{
       return '1'
     }

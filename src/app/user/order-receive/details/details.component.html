@@ -60,7 +60,10 @@
                 <div class="flex">
                   <div class="w-1/2">
                     <p class="font-medium">Ref: {{item.shipment_ref_number}}</p>
-                    <p class="text-gray-600">Shipment date: {{item.shipment_date}}</p>
+                    <p class="text-gray-600">
+                      <span>Shipment date: {{item.shipment_date}}</span>
+                      <span class="ml-3">ETA: {{item.shipment_eta}}</span>
+                    </p>
                   </div>
                   <div class="ml-auto">
                     <div class="flex justify-end">

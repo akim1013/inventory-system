@@ -72,7 +72,7 @@ export class CountComponent implements OnInit {
   startWeeklyCount(){
     if(
         ((this.lastPeriod === `week${Math.ceil(moment().date() / 7)}`) && (moment().diff(moment(this.lastTimestamp), 'days') < 7)) ||
-        ((this.lastPeriod === 'month') && (moment().diff(moment(this.lastTimestamp), 'days') < 28))
+        ((this.lastPeriod === 'month') && (moment(this.lastTimestamp).format('MM') === moment().format('MM')))
       ){
       Swal.fire({
         title: `You can\'t start count.`,
@@ -154,7 +154,7 @@ export class CountComponent implements OnInit {
           this.isCountable = true
           this.lastPeriod = res[0].period
           this.lastTimestamp = res[0].timestamp
-        }else if((res[0].period == 'month') && (moment().diff(moment(res[0].timestamp), 'days') > 30)){
+        }else if((res[0].period == 'month') && (moment().diff(moment(res[0].timestamp), 'months') >= 1 )){
           this.isCountable = true
           this.lastPeriod = res[0].period
           this.lastTimestamp = res[0].timestamp
