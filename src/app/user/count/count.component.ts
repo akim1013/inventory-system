@@ -9,7 +9,8 @@ import { GlobalService } from '../../services/global.service'
 import { LoadingBarService } from '@ngx-loading-bar/core';
 import Swal from 'sweetalert2';
 import { Router } from '@angular/router';
-
+import { customAlphabet } from 'nanoid'
+const nanoid = customAlphabet('1234567890abcdef0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 17)
 @Component({
   selector: 'app-count',
   templateUrl: './count.component.html',
@@ -183,11 +184,65 @@ export class CountComponent implements OnInit {
     })).pipe(first()).subscribe(data => {
       let res = data['data']
       this.allCounts = [...res]
+      console.log(res)
       this.loader.complete()
     }, error => {
       console.log(error)
       this.loader.complete()
     })
+  }
+  send_order(is_count_id){
+    this.api.getDraftItems(
+      this.parseService.encode({
+        draft_id: is_count_id
+      })
+    ).pipe(first()).subscribe(
+      data => {
+        let items = [...data['data']]
+        let order_items = []
+        items.forEach(item => {
+          if((parseFloat(item['safety_qty']) - parseFloat(item['qty_primary'])) > 0){
+            order_items.push({
+              item_id: item['item_id'],
+              qty: parseFloat(item['safety_qty']) - parseFloat(item['qty_primary']),
+            })
+          }
+        })
+
+        this.api.addOrder(this.parseService.encode({
+          company: this.authService.currentUser()['company'],
+          shop: this.authService.currentUser()['shop_name'],
+          branch: this.authService.currentUser()['branch_id'],
+          customer_id: this.authService.currentUser()['id'],
+          order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+          order_ref: nanoid(),
+          status: 'pending',
+          ref_is_id: is_count_id,
+          type: 'auto_order',
+          items: JSON.stringify(order_items)
+        })).pipe(first()).subscribe(data => {
+          if (data['data'] == true) {
+            this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
+            //this.send_mail_to_user(items);
+          }
+        }, error => {
+          this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
+        });
+
+        this.api.orderStatusUpdate(this.parseService.encode({
+          id: is_count_id, // Iscount id
+          order_status: 'order_pending'
+        })).pipe(first()).subscribe(data => {
+          this.getIsCounts()
+        }, error => {
+          // this.toast.error('There had been a database error. Please try again later.', 'Error');
+          // this.loader.complete()
+        })
+      }, error => {
+        console.log(error)
+        this.loader.complete()
+      }
+    )
   }
   format_date_time = (date: any) => {
     return moment(date, 'YYYY-MM-DD HH:mm:ss').format('hh:mm A MMM DD ddd, YYYY')

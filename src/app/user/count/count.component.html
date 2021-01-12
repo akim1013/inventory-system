@@ -25,7 +25,11 @@
               <div class="flex text-gray-600 items-center">
                 <span><i data-feather="clock" class="w-4 h-4 text-blue-700 mr-3" appFeatherIcon></i></span>
                 <span>{{format_date_time(item['timestamp'])}}</span>
-                <span class="bg-theme-{{item.period === 'month' ? '31' : '14'}} text-theme-{{item.period === 'month' ? '6' : '10'}} rounded px-2 ml-5">{{item.period}}</span>
+                <span class="bg-theme-{{item.period === 'month' ? '31' : '14'}} text-theme-{{item.period === 'month' ? '6' : '10'}} rounded px-2 ml-5">
+                  {{item.period}}
+                </span>
+                <!-- <a class="bg-theme-9 text-white rounded px-2 ml-5" *ngIf="(item.order_status == 'order_pending') && (item.status == 'completed') && (item.period != 'month')">View order</a> -->
+                <a class="bg-theme-1 text-white rounded px-2 ml-5" *ngIf="(item.order_status == 'order_not_sent') && (item.status == 'completed') && (item.period != 'month')" (click)="send_order(item['is_count_id'])">Send order</a>
               </div>
             </div>
             <div class="ml-auto flex items-center">

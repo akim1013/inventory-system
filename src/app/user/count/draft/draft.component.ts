@@ -40,7 +40,12 @@ export class DraftComponent implements OnInit {
   draft_items: Array<Object> = []
   period = ''
 
+  categories = ['All categories']
+  selected_category = 'All categories'
+
   is_draft = false;
+
+  qty_draft = []
 
   ngOnInit(): void {
     this.globalService.menu = 'count'
@@ -82,6 +87,14 @@ export class DraftComponent implements OnInit {
       data => {
         if (data['status'] == 'success') {
           this.is_items = [...data['data']]
+          console.log(this.is_items)
+          this.categories = ['All categories']
+          this.is_items.forEach(item => {
+            if(!this.categories.includes(item['category'])){
+              this.categories.push(item['category'])
+            }
+          })
+          this.selected_category = this.categories[0]
           this.api.getDraftItems(
             this.parseService.encode({
               draft_id: this.draft_id
@@ -119,6 +132,80 @@ export class DraftComponent implements OnInit {
       }
     })
     this.loader.complete()
+  }
+  input_primary_qty(item, e){
+    let temp_qty_draft = [...this.qty_draft.filter(_item => _item.is_item_id == item['is_item_id'])]
+    this.qty_draft = [...this.qty_draft.filter(_item => _item.is_item_id != item['is_item_id'])]
+    let qty_primary = parseFloat(e.target.value)
+    let qty_secondary = temp_qty_draft.length != 0 ? parseFloat(temp_qty_draft[0]['qty_secondary']) : 0
+    let value = parseFloat(item.price) * (qty_primary + qty_secondary / parseFloat(this.globalService.get_sp_qty(item.packing_info)))
+    if(e.target.value == '' || e.target.value == 0){
+      if((temp_qty_draft.length != 0) && (temp_qty_draft[0]['qty_secondary'])){
+        this.qty_draft.push({
+          is_item_id: item['is_item_id'],
+          is_count_id: this.draft_id,
+          qty_primary: 0,
+          qty_secondary: temp_qty_draft[0]['qty_secondary'],
+          value: value
+        })
+      }
+    }else{
+      this.qty_draft.push({
+        is_item_id: item['is_item_id'],
+        is_count_id: this.draft_id,
+        qty_primary: e.target.value,
+        qty_secondary: temp_qty_draft.length != 0 ? temp_qty_draft[0]['qty_secondary'] : 0,
+        value: value
+      })
+    }
+  }
+  input_secondary_qty(item, e){
+    let temp_qty_draft = [...this.qty_draft.filter(_item => _item.is_item_id == item['is_item_id'])]
+    this.qty_draft = [...this.qty_draft.filter(_item => _item.is_item_id != item['is_item_id'])]
+    let qty_primary = temp_qty_draft.length != 0 ? parseFloat(temp_qty_draft[0]['qty_primary']) : 0
+    let qty_secondary = parseFloat(e.target.value)
+    let value = parseFloat(item.price) * (qty_primary + qty_secondary / parseFloat(this.globalService.get_sp_qty(item.packing_info)))
+    if(e.target.value == '' || e.target.value == 0){
+      if((temp_qty_draft.length != 0) && (temp_qty_draft[0]['qty_primary'] != 0)){
+        this.qty_draft.push({
+          is_item_id: item['is_item_id'],
+          is_count_id: this.draft_id,
+          qty_secondary: 0,
+          qty_primary: temp_qty_draft[0]['qty_primary'],
+          value: value
+        })
+      }
+    }else{
+      this.qty_draft.push({
+        is_item_id: item['is_item_id'],
+        is_count_id: this.draft_id,
+        qty_secondary: e.target.value,
+        qty_primary: temp_qty_draft.length != 0 ? temp_qty_draft[0]['qty_primary'] : 0,
+        value: value
+      })
+    }
+  }
+  add_qty_draft_to_count(){
+    if(this.qty_draft.length == 0){
+      this.toast.error('No items were counted.', 'Error');
+      return
+    }
+    this.loader.start()
+    this.api.addCountDetailBatch(this.parseService.encode({
+      items: JSON.stringify(this.qty_draft),
+    })).pipe(first()).subscribe(data => {
+      if (data['data'] == true) {
+        this.toast.success('Item counted successfully.', 'Success');
+        this.qty_draft = []
+        this.getItems()
+      } else {
+        this.toast.error('There had been a database error. Please try again later.', 'Error');
+      }
+      this.loader.complete()
+    }, error => {
+      this.toast.error('There had been a database error. Please try again later.', 'Error');
+      this.loader.complete()
+    })
   }
   search_is_item(e){
     this.is_search_key = e.target.value
@@ -196,25 +283,7 @@ export class DraftComponent implements OnInit {
           this.toast.error('You need to input primary qty.', 'Error')
           return false
         }
-        this.loader.start()
-        this.api.addCountDetail(this.parseService.encode({
-          is_count_id: this.draft_id,
-          is_item_id: item.is_item_id,
-          qty_primary: primary_qty,
-          qty_secondary: secondary_qty,
-          value: parseFloat(item.price) * (parseFloat(primary_qty) + parseFloat(secondary_qty) / parseFloat(this.globalService.get_sp_qty(item.packing_info)))
-        })).pipe(first()).subscribe(data => {
-          if (data['data'] == true) {
-            this.toast.success('Item counted successfully.', 'Success');
-            this.getItems()
-          } else {
-            this.toast.error('There had been a database error. Please try again later.', 'Error');
-          }
-          this.loader.complete()
-        }, error => {
-          this.toast.error('There had been a database error. Please try again later.', 'Error');
-          this.loader.complete()
-        })
+        
       }
     })
   }
@@ -300,6 +369,16 @@ export class DraftComponent implements OnInit {
           })
         }
       })
+    }else{
+      this.api.orderStatusUpdate(this.parseService.encode({
+        id: this.draft_id, // Iscount id
+        order_status: 'order_no_need_to_send'
+      })).pipe(first()).subscribe(data => {
+
+      }, error => {
+        // this.toast.error('There had been a database error. Please try again later.', 'Error');
+        // this.loader.complete()
+      })
     }
   }
   send_data_to_dashboard(){
@@ -361,5 +440,13 @@ export class DraftComponent implements OnInit {
   }
   back(){
     this.router.navigate(['count'])
+  }
+
+  getSecondaryUnit(packing_info){
+    if(packing_info.includes('/')){
+      return packing_info.split('/')[0].replace(/[0-9]/g, '')
+    }else{
+      return 'Small unit'
+    }
   }
 }

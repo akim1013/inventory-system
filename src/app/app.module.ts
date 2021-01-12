@@ -32,6 +32,7 @@ import { OrderReceiveComponent } from './user/order-receive/order-receive.compon
 import { DraftComponent } from './user/count/draft/draft.component';
 import { DetailsComponent } from './user/order-receive/details/details.component';
 
+import { NgSelect2Module } from 'ng-select2';
 @NgModule({
   declarations: [
     AppComponent,
@@ -60,6 +61,7 @@ import { DetailsComponent } from './user/order-receive/details/details.component
     appRoutingModule,
     NgxDropzoneModule,
     HttpClientModule,
+    NgSelect2Module,
     LoadingBarModule,
     FormsModule,
     ToastrModule.forRoot(),

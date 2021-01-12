@@ -6,50 +6,92 @@
     <button class="button w-48 rounded-full shadow-md bg-theme-6 text-white" (click)="back()">Back</button>
   </div>
   <div class="grid grid-cols-12 gap-6 mt-3">
-    <div *ngIf="is_draft" class="intro-y box col-span-12 sm:col-span-6">
-      <div class="flex items-center px-5 py-5 sm:py-3 border-b border-gray-200">
-        <h2 class="font-medium text-base mr-auto">Countable items ({{is_items ? is_items.length : 0}})</h2>
+    <div *ngIf="is_draft" class="intro-y box col-span-12 sm:col-span-8">
+      <div class="flex items-center justify-between px-5 py-5 sm:py-3 border-b border-gray-200">
         <div class="relative text-gray-700">
-          <input type="text" class="input input--lg w-full lg:w-64 box pr-10 placeholder-theme-13" placeholder="Search countable items..." (keyup)="search_is_item($event)">
-          <i class="w-4 h-4 absolute my-auto inset-y-0 mr-3 right-0" data-feather="search" appFeatherIcon></i>
+          <ng-select2 
+            [(ngModel)]="selected_category"
+            [data]="categories"
+            [width]="200" 
+            [placeholder]="'Select category'">		
+          </ng-select2>
         </div>
+        <button class="button w-32 flex items-center justify-center bg-theme-1 text-white" (click)="add_qty_draft_to_count()"> 
+          <i data-feather="plus" class="w-4 h-4 mr-2" appFeatherIcon></i> Add ({{qty_draft.length}})
+        </button>
       </div>
-      <div class="p-5">
+      <div class="p-5 grid grid-cols-12 gap-6 mt-5" style="height: 650px; overflow: auto;">
         <ng-template ngFor let-item [ngForOf]="is_items" let-i="index">
-          <div class="relative flex items-center mb-2">
-            <div class="w-12 h-12 flex-none image-fit">
-              <img
-                alt="Inventory system image"
-                class="rounded-full"
-                src="{{item.image ? item.image : 'assets/images/place_holder.png'}}"
-              />
-            </div>
-            <div class="ml-4 mr-auto w-3/5">
-              <p class="font-medium">
-                {{item.description}}
-                <span *ngIf="item.category=='dry'" class="px-2 ml-2 rounded-full border border-theme-12 text-theme-12">dry</span>
-                <span *ngIf="item.category=='frozen'" class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">frozen</span>
-              </p>
-              <div class="text-gray-600 mr-5 sm:mr-5">
-                {{item.vendor_description}}
+          <ng-template [ngIf]="(item.category == selected_category) || (selected_category == 'All categories')">
+            <!-- <div class="relative flex items-center mb-2">
+              <div class="w-12 h-12 flex-none image-fit">
+                <img
+                  alt="Inventory system image"
+                  class="rounded-full"
+                  src="{{item.image ? item.image : 'assets/images/place_holder.png'}}"
+                />
               </div>
-              <div class="text-gray-600 mr-5 sm:mr-5">
-                Packing info: {{item.packing_info}}
+              <div class="ml-4 mr-auto w-3/5">
+                <p class="font-medium">
+                  {{item.description}}
+                  <span *ngIf="item.category=='dry'" class="px-2 ml-2 rounded-full border border-theme-12 text-theme-12">dry</span>
+                  <span *ngIf="item.category=='frozen'" class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">frozen</span>
+                </p>
+                <div class="text-gray-600 mr-5 sm:mr-5">
+                  {{item.vendor_description}}
+                </div>
+                <div class="text-gray-600 mr-5 sm:mr-5">
+                  Packing info: {{item.packing_info}}
+                </div>
+              </div>
+              <div class="font-medium text-gray-700 w-1/5 sm:w-auto">
+                <button title="Add this item to count list" *ngIf="!item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_to_count(item)">+ ADD</button>
+                <button title="This item was already added to count list" *ngIf="item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border text-gray-600 cursor-not-allowed">ADDED</button>
+              </div>
+            </div> -->
+            <div class="col-span-6 md:col-span-3 xl:col-span-3 box">
+              <div class="flex items-center border-b border-gray-200 px-5 py-4">
+                <div class="mr-auto">
+                  <a href="" class="font-medium">{{item.description}}</a> 
+                  <div class="flex text-gray-600 truncate text-xs mt-1"> 
+                    <a class="text-theme-1 inline-block truncate" href="">{{item.category}}</a> 
+                    <span class="mx-1">•</span> {{item.price | currency}}
+                  </div>
+                </div>
+              </div>
+              <div class="p-5">
+                <div class="h-40 xxl:h-56 image-fit">
+                  <img alt="Inventory system image" class="rounded-md" src="{{item.image ? item.image : 'assets/images/place_holder.png'}}">
+                </div>
+              </div>
+              <div class="px-5 pt-3 pb-5 border-t border-gray-200">
+                <div class="w-full flex text-gray-600 text-xs sm:text-sm">
+                  <div class="mr-2"><span class="font-medium">{{item.packing_info}}</span> </div>
+                  <div class="ml-auto"> Unit: <span class="font-medium">{{item.unit}}</span> </div>
+                </div>
+                <div *ngIf="!item.added" class="w-full flex items-center mt-3">
+                  <div *ngIf="period == 'month'" class="w-full flex items-center justify-between relative text-gray-700">
+                    <div class="w-1/2 pr-1"><input type="number" step="1" min="0" class="w-full input rounded-full border pr-10 placeholder-theme-13" placeholder="{{item.unit}} qty" (keyup)="input_primary_qty(item, $event)"/></div>
+                    <div class="w-1/2 pl-1"><input type="number" step="1" min="0" class="w-full input rounded-full border pr-10 placeholder-theme-13" placeholder="{{getSecondaryUnit(item.packing_info)}} qty" (keyup)="input_secondary_qty(item, $event)"/></div>
+                  </div>
+                  <div *ngIf="period != 'month'" class="w-full flex items-center justify-between relative text-gray-700">
+                    <div class="w-full"><input type="number" step="1" min="0" class="w-full input rounded-full border pr-10 placeholder-theme-13" placeholder="{{item.unit}} qty" (keyup)="input_primary_qty(item, $event)"/></div>
+                  </div>
+                </div>
+                <div *ngIf="item.added" class="w-full flex items-center mt-3">
+                  <span class="text-theme-9">✔ Counted</span>
+                </div>
               </div>
             </div>
-            <div class="font-medium text-gray-700 w-1/5 sm:w-auto">
-              <button title="Add this item to count list" *ngIf="!item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border-theme-9 text-theme-9 cursor-pointer" (click)="add_to_count(item)">+ ADD</button>
-              <button title="This item was already added to count list" *ngIf="item.added" class="px-2 sm:px-3 sm:py-1 rounded-full border border text-gray-600 cursor-not-allowed">ADDED</button>
-            </div>
-          </div>
+          </ng-template>
         </ng-template>
       </div>
     </div>
-    <div class="intro-y box col-span-12 sm:col-span-{{is_draft ? '6' : '12'}}">
+    <div class="intro-y box col-span-12 sm:col-span-{{is_draft ? '4' : '12'}}">
       <div class="flex items-center px-5 py-5 sm:py-3 border-b border-gray-200">
         <h2 class="font-medium text-base mr-auto">Counted items({{draft_items.length != 0 ? draft_items.length : 0}})</h2>
       </div>
-      <div class="p-5">
+      <div class="p-5" style="height: 650px; overflow: auto;">
         <ng-template ngFor let-item [ngForOf]="draft_items" let-i="index">
           <div class="relative flex items-center mb-2">
             <div class="w-12 h-12 flex-none image-fit">

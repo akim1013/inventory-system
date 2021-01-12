@@ -92,6 +92,12 @@ export class ApiService {
         return res;
       }))
   }
+  addCountDetailBatch(data: FormData){
+    return this.http.post(`${api_url}/${controller}/add_count_detail_batch`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
   canStartCount(data: FormData){
     return this.http.post(`${api_url}/${controller}/can_start_count`, data)
       .pipe(map(res => {
