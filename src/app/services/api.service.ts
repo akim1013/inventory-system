@@ -280,4 +280,10 @@ export class ApiService {
         return res;
       }))
   }
+  purchasingSystemGetLastPoNumber(data: FormData) {
+    return this.http.post(`${api_url}/purchasing/get_last_po_number`, data)
+      .pipe(map(res => {
+        return res;
+      }))
+  }
 }

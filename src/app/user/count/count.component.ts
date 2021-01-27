@@ -209,22 +209,53 @@ export class CountComponent implements OnInit {
           }
         })
 
-        this.api.addOrder(this.parseService.encode({
-          company: this.authService.currentUser()['company'],
-          shop: this.authService.currentUser()['shop_name'],
-          branch: this.authService.currentUser()['branch_id'],
-          customer_id: this.authService.currentUser()['id'],
-          order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-          order_ref: nanoid(),
-          status: 'pending',
-          ref_is_id: is_count_id,
-          type: 'auto_order',
-          items: JSON.stringify(order_items)
+        let tail:any = '001'
+        let year = moment().format('YYYY')
+        let po_number = ''
+        this.api.purchasingSystemGetLastPoNumber(this.parseService.encode({
+          'company': this.authService.currentUser()['company'],
+          'shop': this.authService.currentUser()['shop_name'],
+          'branch': this.authService.currentUser()['branch_id']
         })).pipe(first()).subscribe(data => {
-          if (data['data'] == true) {
-            this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
-            //this.send_mail_to_user(items);
+          if(data['status'] == 'success'){
+            if(year == data['data'][0].order_ref.slice(-7, -3)){
+              tail = parseInt((data['data'][0].order_ref.slice(-3)).replace( /^\D+/g, ''))
+
+              if(!tail || tail == '999'){
+                tail = '001'
+              }else{
+                let len = Math.floor(Math.log(tail + 1)/Math.log(10)) + 1
+                let temp = ''
+                for(let i = 0; i < 3 - len; i++){
+                  temp += '0'
+                }
+                tail = temp + (tail + 1).toString()
+              }
+            }else{
+              tail = '001'
+            }
           }
+          po_number = this.authService.currentUser()['branch_id'] + moment().format('MMDDYYYY') + tail
+
+          this.api.addOrder(this.parseService.encode({
+            company: this.authService.currentUser()['company'],
+            shop: this.authService.currentUser()['shop_name'],
+            branch: this.authService.currentUser()['branch_id'],
+            customer_id: this.authService.currentUser()['id'],
+            order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+            order_ref: po_number,
+            status: 'pending',
+            ref_is_id: is_count_id,
+            type: 'auto_order',
+            items: JSON.stringify(order_items)
+          })).pipe(first()).subscribe(data => {
+            if (data['data'] == true) {
+              this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
+              //this.send_mail_to_user(items);
+            }
+          }, error => {
+            this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
+          });
         }, error => {
           this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
         });

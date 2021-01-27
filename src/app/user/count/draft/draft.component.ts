@@ -228,15 +228,15 @@ export class DraftComponent implements OnInit {
             <div class="w-full flex justify-start items-center">Price: <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> $${item['price']}</span></div>
           </div>
           <div class="flex items-center mt-2">
-            <div class="w-full flex justify-start items-center">Category: 
-              <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;"> 
+            <div class="w-full flex justify-start items-center">Category:
+              <span class="ml-1 text-theme-3" style="font-size: 15px; font-weight: bold;">
                 <span class="px-2 ml-2 rounded-full border border-theme-3 text-theme-3">${item['category']}</span>
               </span>
             </div>
           </div>
           <div class="flex items-center mt-3 w-full">
             <div class="flex items-center w-full">
-              <div class="mr-2">${this.globalService.get_primary_uom(item.packing_info) ? 
+              <div class="mr-2">${this.globalService.get_primary_uom(item.packing_info) ?
                 this.globalService.get_primary_uom(item.packing_info) : 'Primary '
               } qty: </div>
               <input
@@ -252,7 +252,7 @@ export class DraftComponent implements OnInit {
             </div>
             ${ this.period === 'month' ? `
             <div class="ml-1 sm:ml-5 flex items-center w-full">
-              <div class="mr-2">${this.globalService.get_secondary_uom(item.packing_info) ? 
+              <div class="mr-2">${this.globalService.get_secondary_uom(item.packing_info) ?
                 this.globalService.get_secondary_uom(item.packing_info) : 'Secondary '
               } qty: </div>
               <input
@@ -283,7 +283,7 @@ export class DraftComponent implements OnInit {
           this.toast.error('You need to input primary qty.', 'Error')
           return false
         }
-        
+
       }
     })
   }
@@ -338,25 +338,77 @@ export class DraftComponent implements OnInit {
         icon: 'question'
       }).then((result) => {
         if (result.isConfirmed) {
-          this.api.addOrder(this.parseService.encode({
-            company: this.authService.currentUser()['company'],
-            shop: this.authService.currentUser()['shop_name'],
-            branch: this.authService.currentUser()['branch_id'],
-            customer_id: this.authService.currentUser()['id'],
-            order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
-            order_ref: nanoid(),
-            status: 'pending',
-            ref_is_id: this.draft_id,
-            type: 'auto_order',
-            items: JSON.stringify(order_items)
+
+          let tail:any = '001'
+          let year = moment().format('YYYY')
+          let po_number = ''
+          this.api.purchasingSystemGetLastPoNumber(this.parseService.encode({
+            'company': this.authService.currentUser()['company'],
+            'shop': this.authService.currentUser()['shop_name'],
+            'branch': this.authService.currentUser()['branch_id']
           })).pipe(first()).subscribe(data => {
-            if (data['data'] == true) {
-              this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
-              //this.send_mail_to_user(items);
+            if(data['status'] == 'success'){
+              if(year == data['data'][0].order_ref.slice(-7, -3)){
+                tail = parseInt((data['data'][0].order_ref.slice(-3)).replace( /^\D+/g, ''))
+
+                if(!tail || tail == '999'){
+                  tail = '001'
+                }else{
+                  let len = Math.floor(Math.log(tail + 1)/Math.log(10)) + 1
+                  let temp = ''
+                  for(let i = 0; i < 3 - len; i++){
+                    temp += '0'
+                  }
+                  tail = temp + (tail + 1).toString()
+                }
+              }else{
+                tail = '001'
+              }
             }
+            po_number = this.authService.currentUser()['branch_id'] + moment().format('MMDDYYYY') + tail
+
+            this.api.addOrder(this.parseService.encode({
+              company: this.authService.currentUser()['company'],
+              shop: this.authService.currentUser()['shop_name'],
+              branch: this.authService.currentUser()['branch_id'],
+              customer_id: this.authService.currentUser()['id'],
+              order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+              order_ref: po_number,
+              status: 'pending',
+              ref_is_id: this.draft_id,
+              type: 'auto_order',
+              items: JSON.stringify(order_items)
+            })).pipe(first()).subscribe(data => {
+              if (data['data'] == true) {
+                this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
+                //this.send_mail_to_user(items);
+              }
+            }, error => {
+              this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
+            });
           }, error => {
             this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
           });
+
+          // this.api.addOrder(this.parseService.encode({
+          //   company: this.authService.currentUser()['company'],
+          //   shop: this.authService.currentUser()['shop_name'],
+          //   branch: this.authService.currentUser()['branch_id'],
+          //   customer_id: this.authService.currentUser()['id'],
+          //   order_time: moment().format('YYYY-MM-DD HH:mm:ss'),
+          //   order_ref: nanoid(),
+          //   status: 'pending',
+          //   ref_is_id: this.draft_id,
+          //   type: 'auto_order',
+          //   items: JSON.stringify(order_items)
+          // })).pipe(first()).subscribe(data => {
+          //   if (data['data'] == true) {
+          //     this.toast.success('Order has been placed successfully. Please check out your email to see the order details or visit purchasing system to adjust order.', 'Success');
+          //     //this.send_mail_to_user(items);
+          //   }
+          // }, error => {
+          //   this.toast.error('There is an issue with server while placing automatic order. Please try again later.', 'Error');
+          // });
 
           this.api.orderStatusUpdate(this.parseService.encode({
             id: this.draft_id, // Iscount id
